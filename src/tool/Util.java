@@ -1,16 +1,13 @@
 package tool;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public final class Util {
 	public static final String USER_HOME_DIR = System.getProperty("user.home");
@@ -19,10 +16,6 @@ public final class Util {
 	public static final Locale LOCALE_JP = new Locale("ja", "JP");
 	public static final Locale LOCALE_US = new Locale("en", "US");
 	public static final Locale LOCALE_VN = new Locale("vi", "VN");
-
-	private static final Gson GSON = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss")
-			.excludeFieldsWithoutExposeAnnotation().setPrettyPrinting()
-			.create();
 
 	private Util() {}
 
@@ -73,15 +66,6 @@ public final class Util {
 		BufferedWriter w = new BufferedWriter(new FileWriter(file));
 		w.write(data, 0, data.length());
 		w.close();
-	}
-
-	public static <T> void saveCache(T obj, String filePath) throws IOException {
-		if (!createNewFile(filePath)) return;
-		writeToFile(filePath, convertToJson(obj));
-	}
-
-	public static <T> T loadCache(String filePath, Class<T> classOfT) {
-		return convertToGson(streamToString(filePath), classOfT);
 	}
 
 	public static String streamToString(String filePath) {
@@ -143,14 +127,6 @@ public final class Util {
 	public static void setAntialias(Graphics2D gg) {
 		gg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		gg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-	}
-
-	public static <T> T convertToGson(String json, Class<T> classOfT) {
-		return GSON.fromJson(json, classOfT);
-	}
-
-	public static String convertToJson(Object obj) {
-		return GSON.toJson(obj);
 	}
 
 	public static void beep() {

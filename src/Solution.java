@@ -1,28 +1,9 @@
 import java.io.*;
 
-public class Contest extends AbsContest {
-   protected static final int MOD = (int) 1E9 + 7;
-
-   public Contest() {
-      super(false, false, false);
-   }
-
-   public static void main(String[] args) {
-      try {
-         new Contest().start();
-      }
-      catch (Exception e) {
-         e.printStackTrace();
-      }
-   }
-
-   @Override
-   protected void solve() throws Exception {
-   }
-}
-
-abstract class AbsContest {
-   protected abstract void solve() throws Exception;
+class AsciiFastIo {
+   protected final InputStream in;
+   protected final OutputStream out;
+   protected final PrintStream err;
 
    private static final int BUFFER_SIZE = (1 << 13);
    private static final int WHITE_SPACE = 32;
@@ -33,68 +14,14 @@ abstract class AbsContest {
    private int inNextIndex;
    private int inReadByteCount;
    private int outNextIndex;
-   private InputStream in = System.in;
-   private OutputStream out = System.out;
-   private PrintStream info = System.err;
 
-   private final boolean showDebugTrace;
-   private final boolean inputFromLocalFile;
-   private final boolean outputToLocalFile;
-
-   protected AbsContest(boolean showDebugTrace, boolean inputFromLocalFile, boolean outputToLocalFile) {
-      this.showDebugTrace = showDebugTrace;
-      this.inputFromLocalFile = inputFromLocalFile;
-      this.outputToLocalFile = outputToLocalFile;
+   protected AsciiFastIo(InputStream in, OutputStream out, PrintStream err) {
+      this.in = in;
+      this.out = out;
+      this.err = err;
    }
 
-   protected void start() throws Exception {
-      if (inputFromLocalFile) {
-         String fs = File.separator;
-         String root = new File("").getAbsolutePath();
-         String inPath = root + fs + "testdata" + fs + "in.txt";
-
-         if (showDebugTrace) {
-            info.println("Input: " + inPath);
-         }
-
-         in = new FileInputStream(inPath);
-      }
-      else if (showDebugTrace) {
-         info.println("Input: Console");
-      }
-
-      if (outputToLocalFile) {
-         String fs = File.separator;
-         String root = new File("").getAbsolutePath();
-         String outPath = root + fs + "testdata" + fs + "in.txt";
-
-         if (showDebugTrace) {
-            info.println("Output: " + outPath);
-         }
-
-         out = new FileOutputStream(outPath);
-      }
-      else if (showDebugTrace) {
-         info.println("Output: Console");
-      }
-
-      long start = 0;
-
-      if (showDebugTrace) {
-         start = System.currentTimeMillis();
-      }
-
-      nextByte();
-      solve();
-      in.close();
-      flushOutBuf();
-
-      if (showDebugTrace) {
-         info.printf("\nSolve completed in %.3f [s]\n", (System.currentTimeMillis() - start) / 1000.0);
-      }
-   }
-
-   private int nextByte() throws IOException {
+   protected int nextByte() throws IOException {
       if (inNextIndex >= inReadByteCount) {
          inReadByteCount = in.read(IN_BUFFER, 0, BUFFER_SIZE);
 
@@ -312,7 +239,7 @@ abstract class AbsContest {
       return a;
    }
 
-   private void flushOutBuf() {
+   protected void flushOutBuf() {
       try {
          if (outNextIndex <= 0) {
             return;
@@ -370,18 +297,119 @@ abstract class AbsContest {
       }
       println(format);
    }
+}
 
-   protected final void debug(String format, Object... args) {
-      if (args != null) {
-         format = String.format(format, args);
-      }
-      info.print(format);
+public class Solution extends AsciiFastIo {
+   protected static final int MOD = (int) 1E9 + 7;
+
+   public Solution(InputStream in, OutputStream out, PrintStream err) {
+      super(in, out, err);
    }
 
-   protected final void debugln(String format, Object... args) {
+   private void start(boolean showDebugTrace) throws Exception {
+      long start = 0;
+
+      if (showDebugTrace) {
+         start = System.currentTimeMillis();
+      }
+
+      nextByte();
+      solve();
+      in.close();
+      flushOutBuf();
+
+      if (showDebugTrace) {
+         err.printf("\nSolve completed in %.3f [s]\n", (System.currentTimeMillis() - start) / 1000.0);
+      }
+   }
+
+   private void debug(String format, Object... args) {
       if (args != null) {
          format = String.format(format, args);
       }
-      info.println(format);
+      err.print(format);
+   }
+
+   private void debugln(String format, Object... args) {
+      if (args != null) {
+         format = String.format(format, args);
+      }
+      err.println(format);
+   }
+
+   public static void main(String[] args) {
+      try {
+         InputStream in = System.in;
+         OutputStream out = System.out;
+         PrintStream err = System.err;
+
+         boolean showDebugTrace = args != null && args.length > 0 && Boolean.parseBoolean(args[0]);
+         boolean inputFromLocalFile = args != null && args.length > 1 && Boolean.parseBoolean(args[1]);
+         boolean outputToLocalFile = args != null && args.length > 1 && Boolean.parseBoolean(args[2]);
+
+         if (inputFromLocalFile) {
+            String fs = File.separator;
+            String root = new File("").getAbsolutePath();
+            String inPath = root + fs + "testdata" + fs + "in.txt";
+
+            if (showDebugTrace) {
+               err.println("Input: " + inPath);
+            }
+
+            in = new FileInputStream(inPath);
+         }
+         else if (showDebugTrace) {
+            err.println("Input: Console");
+         }
+
+         if (outputToLocalFile) {
+            String fs = File.separator;
+            String root = new File("").getAbsolutePath();
+            String outPath = root + fs + "testdata" + fs + "in.txt";
+
+            if (showDebugTrace) {
+               err.println("Output: " + outPath);
+            }
+
+            out = new FileOutputStream(outPath);
+         }
+         else if (showDebugTrace) {
+            err.println("Output: Console");
+         }
+
+         new Solution(in, out, err).start(showDebugTrace);
+      }
+      catch (Exception e) {
+         e.printStackTrace();
+      }
+   }
+
+   private void solve() throws Exception {
+       final int T = ni();
+
+       for (int t = 1; t <= T; ++t) {
+          int N = ni(); // stacks
+          int K = ni(); // plate count in each stack
+          int P = ni(); // wanna take plate count
+
+          int[][] b = ni(N, K);
+
+          int max = dp(b, K - 1, P);
+
+          println("Case #%d: %d", t, max);
+       }
+   }
+
+   int dp(int[][] b, int depth, int P) {
+      if (depth < 0) {
+         return 0;
+      }
+
+      int max = -1;
+      for (int i = 0; i < b.length; ++i) {
+         if (max < b[i][depth]) max = b[i][depth];
+      }
+
+      return max + dp(b, depth - 1);
    }
 }
