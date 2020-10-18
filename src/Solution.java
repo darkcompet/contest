@@ -1,29 +1,134 @@
 import java.io.*;
+import java.util.Locale;
 
-class AsciiFastIo {
-   protected final InputStream in;
-   protected final OutputStream out;
-   protected final PrintStream err;
+// javac Solution.java; java Solution debug:1 localInput:0 localOutput:0
+public class Solution extends BaseSolution {
+   protected static final int MOD = (int) 1E9 + 7;
+
+   public Solution() {
+      super();
+   }
+
+   protected void solve() throws Exception {
+   }
+
+   public static void main(String[] args) {
+      try {
+         new Solution().start(args);
+      }
+      catch (Exception e) {
+         e.printStackTrace();
+      }
+   }
+}
+
+abstract class BaseSolution {
+   protected abstract void solve() throws Exception;
+   
+   protected InputStream in = System.in;
+   protected OutputStream out = System.out;
+   protected PrintStream err = System.err;
 
    private static final int BUFFER_SIZE = (1 << 13);
-   private static final int WHITE_SPACE = 32;
-   private static final byte[] IN_BUFFER = new byte[BUFFER_SIZE];
-   private static final byte[] OUT_BUFFER = new byte[BUFFER_SIZE];
+   private static final int WHITE_SPACE = 32; // space, tab, linefeed
+   private final byte[] inBuffer = new byte[BUFFER_SIZE];
+   private final byte[] outBuffer = new byte[BUFFER_SIZE];
 
    private int inNextByte;
    private int inNextIndex;
    private int inReadByteCount;
    private int outNextIndex;
 
-   protected AsciiFastIo(InputStream in, OutputStream out, PrintStream err) {
-      this.in = in;
-      this.out = out;
-      this.err = err;
+   protected BaseSolution() {
+   }
+   
+   protected void start(String[] args) throws Exception {
+      String ls = System.lineSeparator();
+      boolean showDebugTrace = false;
+      boolean inputFromLocalFile = false;
+      boolean outputToLocalFile = false;
+      
+      if (args != null) {
+         for (String arg : args) {
+            String[] arr = arg.split(":");
+            if (arr != null && arr.length == 2) {
+               arr[0] = arr[0].toLowerCase();
+               arr[1] = arr[1].toLowerCase();
+               if ("debug".equals(arr[0])) {
+                  showDebugTrace = "1".equals(arr[1]) || "true".equals(arr[1]);
+               }
+               if ("localInput".equals(arr[0])) {
+                  inputFromLocalFile = "1".equals(arr[1]) || "true".equals(arr[1]);
+               }
+               if ("localOutput".equals(arr[0])) {
+                  outputToLocalFile = "1".equals(arr[1]) || "true".equals(arr[1]);
+               }
+            }
+         }
+      }
+
+      if (inputFromLocalFile) {
+         String fs = File.separator;
+         String root = new File("").getAbsolutePath();
+         String inPath = root + fs + "testdata" + fs + "in.txt";
+
+         if (showDebugTrace) {
+            err.println("Input: " + inPath);
+         }
+
+         this.in = new FileInputStream(inPath);
+      }
+      else if (showDebugTrace) {
+         err.println("Input: Console");
+      }
+
+      if (outputToLocalFile) {
+         String fs = File.separator;
+         String root = new File("").getAbsolutePath();
+         String outPath = root + fs + "testdata" + fs + "in.txt";
+
+         if (showDebugTrace) {
+            err.println("Output: " + outPath);
+         }
+
+         this.out = new FileOutputStream(outPath);
+      }
+      else if (showDebugTrace) {
+         err.println("Output: Console");
+      }
+
+      long start = 0;
+      if (showDebugTrace) {
+         start = System.currentTimeMillis();
+      }
+      
+      if (showDebugTrace) {
+         err.printf("%sSolve completed in %.3f [s]%s", ls, (System.currentTimeMillis() - start) / 1000.0, ls);
+      }
+      
+      this.nextByte();
+      this.solve();
+      in.close();
+      this.flushOutBuf();
+   }
+   
+   protected void debug(String format, Object... args) {
+      if (args != null) {
+         format = String.format(format, args);
+      }
+      err.print(format);
+   }
+
+   protected void debugln(String format, Object... args) {
+      if (args != null) {
+         format = String.format(format, args);
+      }
+      err.println(format);
    }
 
    protected int nextByte() throws IOException {
       if (inNextIndex >= inReadByteCount) {
-         inReadByteCount = in.read(IN_BUFFER, 0, BUFFER_SIZE);
+         inReadByteCount = in.read(inBuffer, 0, BUFFER_SIZE);
 
          if (inReadByteCount == -1) {
             return (inNextByte = -1);
@@ -32,7 +137,7 @@ class AsciiFastIo {
          inNextIndex = 0;
       }
 
-      return (inNextByte = IN_BUFFER[inNextIndex++]);
+      return (inNextByte = inBuffer[inNextIndex++]);
    }
 
    protected final char nc() throws IOException {
@@ -59,13 +164,12 @@ class AsciiFastIo {
          nextByte();
       }
       if (inNextByte < '0' || inNextByte > '9') {
-         throw new RuntimeException("Invalid integer value format to read");
+         throw new MyRuntimeException("Invalid integer value format to read");
       }
 
       do {
          res = (res << 1) + (res << 3) + inNextByte - '0';
-      }
-      while (nextByte() >= '0' && inNextByte <= '9');
+      } while (nextByte() >= '0' && inNextByte <= '9');
 
       return minus ? -res : res;
    }
@@ -83,19 +187,20 @@ class AsciiFastIo {
          nextByte();
       }
       if (inNextByte < '0' || inNextByte > '9') {
-         throw new RuntimeException("Invalid long value format to read");
+         throw new MyRuntimeException("Invalid long value format to read");
       }
 
       do {
          res = (res << 1) + (res << 3) + inNextByte - '0';
-      }
-      while (nextByte() >= '0' && inNextByte <= '9');
+      } while (nextByte() >= '0' && inNextByte <= '9');
 
       return minus ? -res : res;
    }
 
    protected final double nd() throws IOException {
-      double pre = 0.0, suf = 0.0, div = 1.0;
+      double pre = 0.0;
+      double suf = 0.0;
+      double div = 1.0;
 
       while (inNextByte <= WHITE_SPACE) {
          nextByte();
@@ -107,13 +212,12 @@ class AsciiFastIo {
          nextByte();
       }
       if (inNextByte < '0' || inNextByte > '9') {
-         throw new RuntimeException("Invalid double value format to read");
+         throw new MyRuntimeException("Invalid double value format to read");
       }
 
       do {
          pre = 10 * pre + (inNextByte - '0');
-      }
-      while (nextByte() >= '0' && inNextByte <= '9');
+      } while (nextByte() >= '0' && inNextByte <= '9');
 
       if (inNextByte == '.') {
          while (nextByte() >= '0' && inNextByte <= '9') {
@@ -244,7 +348,7 @@ class AsciiFastIo {
          if (outNextIndex <= 0) {
             return;
          }
-         out.write(OUT_BUFFER, 0, outNextIndex);
+         out.write(outBuffer, 0, outNextIndex);
          out.flush();
          outNextIndex = 0;
       } catch (Exception e) {
@@ -257,7 +361,7 @@ class AsciiFastIo {
          s = "null";
       }
       for (int i = 0, N = s.length(); i < N; ++i) {
-         OUT_BUFFER[outNextIndex++] = (byte) s.charAt(i);
+         outBuffer[outNextIndex++] = (byte) s.charAt(i);
 
          if (outNextIndex >= BUFFER_SIZE) {
             flushOutBuf();
@@ -273,8 +377,7 @@ class AsciiFastIo {
    protected final void print(Object obj) {
       if (obj == null) {
          print("null");
-      }
-      else {
+      } else {
          print(obj.toString());
       }
    }
@@ -299,117 +402,14 @@ class AsciiFastIo {
    }
 }
 
-public class Solution extends AsciiFastIo {
-   protected static final int MOD = (int) 1E9 + 7;
+class MyRuntimeException extends RuntimeException {
+   private static final long serialVersionUID = 6397993684793238979L;
 
-   public Solution(InputStream in, OutputStream out, PrintStream err) {
-      super(in, out, err);
+   public MyRuntimeException(String msg) {
+      super(msg);
    }
-
-   private void start(boolean showDebugTrace) throws Exception {
-      long start = 0;
-
-      if (showDebugTrace) {
-         start = System.currentTimeMillis();
-      }
-
-      nextByte();
-      solve();
-      in.close();
-      flushOutBuf();
-
-      if (showDebugTrace) {
-         err.printf("\nSolve completed in %.3f [s]\n", (System.currentTimeMillis() - start) / 1000.0);
-      }
-   }
-
-   private void debug(String format, Object... args) {
-      if (args != null) {
-         format = String.format(format, args);
-      }
-      err.print(format);
-   }
-
-   private void debugln(String format, Object... args) {
-      if (args != null) {
-         format = String.format(format, args);
-      }
-      err.println(format);
-   }
-
-   public static void main(String[] args) {
-      try {
-         InputStream in = System.in;
-         OutputStream out = System.out;
-         PrintStream err = System.err;
-
-         boolean showDebugTrace = args != null && args.length > 0 && Boolean.parseBoolean(args[0]);
-         boolean inputFromLocalFile = args != null && args.length > 1 && Boolean.parseBoolean(args[1]);
-         boolean outputToLocalFile = args != null && args.length > 1 && Boolean.parseBoolean(args[2]);
-
-         if (inputFromLocalFile) {
-            String fs = File.separator;
-            String root = new File("").getAbsolutePath();
-            String inPath = root + fs + "testdata" + fs + "in.txt";
-
-            if (showDebugTrace) {
-               err.println("Input: " + inPath);
-            }
-
-            in = new FileInputStream(inPath);
-         }
-         else if (showDebugTrace) {
-            err.println("Input: Console");
-         }
-
-         if (outputToLocalFile) {
-            String fs = File.separator;
-            String root = new File("").getAbsolutePath();
-            String outPath = root + fs + "testdata" + fs + "in.txt";
-
-            if (showDebugTrace) {
-               err.println("Output: " + outPath);
-            }
-
-            out = new FileOutputStream(outPath);
-         }
-         else if (showDebugTrace) {
-            err.println("Output: Console");
-         }
-
-         new Solution(in, out, err).start(showDebugTrace);
-      }
-      catch (Exception e) {
-         e.printStackTrace();
-      }
-   }
-
-   private void solve() throws Exception {
-       final int T = ni();
-
-       for (int t = 1; t <= T; ++t) {
-          int N = ni(); // stacks
-          int K = ni(); // plate count in each stack
-          int P = ni(); // wanna take plate count
-
-          int[][] b = ni(N, K);
-
-          int max = dp(b, K - 1, P);
-
-          println("Case #%d: %d", t, max);
-       }
-   }
-
-   int dp(int[][] b, int depth, int P) {
-      if (depth < 0) {
-         return 0;
-      }
-
-      int max = -1;
-      for (int i = 0; i < b.length; ++i) {
-         if (max < b[i][depth]) max = b[i][depth];
-      }
-
-      return max + dp(b, depth - 1);
+   
+   public MyRuntimeException(String format, Object... args) {
+      super(String.format(Locale.US, format, args));
    }
 }
