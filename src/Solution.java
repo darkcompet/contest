@@ -10,7 +10,34 @@ public class Solution extends BaseSolution {
    }
 
    protected void solve() throws Exception {
+      int N = ni();
+      int[] a = ni(N);
+      
+      for (int keta = 10; keta >= 1; --keta) {
+         int[] ds = new int[10];
+         
+         for (int i = 0; i < N; ++i) {
+            int num = digit(keta, a[i]);
+            ++ds[num];
+         }
+      }
    }
+   
+   int digit(int k, long a) {
+      return (int) (a / pow(10, k, MOD));
+   }
+   
+   public static long pow(long x, int n, int mod) {
+		if (n < 0) throw new RuntimeException();
+		long res = 1;
+		if (x >= mod || x <= -mod) x %= mod;
+		while (n > 0) {
+			if ((n & 1) == 1) res = res * x % mod;
+			n >>= 1;
+			x = x * x % mod;
+		}
+		return res;
+	}
 
    public static void main(String[] args) {
       try {
