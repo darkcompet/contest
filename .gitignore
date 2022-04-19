@@ -1,0 +1,10 @@
+# DarkCompet definition
+.DS_Store
+.DS_Store*
+.localized
+/.vscode
+/obj
+/bin
+/local
+*.exe
+/data
