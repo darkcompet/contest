@@ -1,3 +1,4 @@
-namespace Tool.Compet.Core {
-	public class DkGraphs { }
-}
+// namespace Tool.Compet.Core {
+	public class DkGraphs {
+	}
+// }
