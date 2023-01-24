@@ -3,8 +3,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-/// Goto source: cd Source
-/// Run: mcs Contest.cs; mono Contest.exe < ../Data/in.txt
+/// Run: cd Source; mcs Contest.cs; mono Contest.exe < ../Data/in.txt
 public class Contest : SolutionWithFastIO {
 	protected override void Solve() {
 	}
@@ -462,5 +461,9 @@ public abstract class SolutionWithFastIO {
 
 	protected static void Debug(string message) {
 		Console.WriteLine(message);
+	}
+
+	protected long Now() {
+		return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 	}
 }

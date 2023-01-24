@@ -4,22 +4,9 @@ For Online Programming Contest.
 This project is written mainly in C# and should be run with Mono.
 
 
-## Quickstart
+## Quick start
 
 - Run
-
-	```bash
-	# Goto source folder
-	cd Source
-
-	# Compile
-	mcs Contest.cs
-
-	# Execute
-	mono Contest.exe
-	```
-
-- Or with one line
 
 	```bash
 	cd Source; mcs Contest.cs; mono Contest.exe;
