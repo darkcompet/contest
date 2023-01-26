@@ -3,9 +3,43 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-/// Run: cd Source; mcs Contest.cs; mono Contest.exe < ../Data/in.txt
+/// Run: cd Source && mcs Contest.cs && mono Contest.exe < ../Data/in.txt
 public class Contest : SolutionWithFastIO {
+	const long MOD = 998244353;
+
 	protected override void Solve() {
+		var N = ReadInt();
+		var d1 = ReadDigits(N);
+		var d2 = ReadDigits(N);
+
+		for (var index = 0; index < N; ++index) {
+			if (d1[index] > d2[index]) {
+				var tmp = d1[index];
+				d1[index] = d2[index];
+				d2[index] = tmp;
+			}
+		}
+
+		// f(n) = a_n + x * f(n - 1)
+		// f(1) = a_1 + x * f(0)
+		// f(0) = a_0
+		// for(i: 0 -> n): f = a_i + x * f
+		var f1 = 0L;
+		var f2 = 0L;
+		for (var index = 0; index < N; ++index) {
+			f1 = mod_add(mod_mul(f1, 10), d1[index]);
+			f2 = mod_add(mod_mul(f2, 10), d2[index]);
+		}
+
+		WriteLine(mod_mul(f1, f2));
+	}
+
+	long mod_add(long a, long b) {
+		return (a + b) % MOD;
+	}
+
+	long mod_mul(long a, long b) {
+		return (a * b) % MOD;
 	}
 
 	public static void Main(string[] args) {
@@ -13,7 +47,7 @@ public class Contest : SolutionWithFastIO {
 	}
 }
 
-/// This read, write ascii bytes which be in range [0, 255].
+/// This performs read/write on ASCII bytes which be in range [0, 255].
 /// See: https://www.asciitable.com/
 /// Ref: /// https://github.com/davidsekar/C-sharp-Programming-IO/blob/master/ConsoleInOut/InputOutput.cs
 public abstract class SolutionWithFastIO {
@@ -21,7 +55,7 @@ public abstract class SolutionWithFastIO {
 	protected abstract void Solve();
 
 	/// White space chars: space, tab, linefeed
-	private const int WHITE_SPACE = 32;
+	private const int WHITE_SPACE_CODE = 32;
 	private const int IN_BUFFER_SIZE = 1 << 13;
 	private const int OUT_BUFFER_SIZE = 1 << 13;
 
@@ -216,6 +250,7 @@ public abstract class SolutionWithFastIO {
 		return isNegative ? -(pre + suf) : (pre + suf);
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public char ReadChar() {
 		return (char)this.ReadNextByteSkipWhitespace();
 	}
@@ -227,7 +262,7 @@ public abstract class SolutionWithFastIO {
 		while (true) {
 			sb.Append((char)nextByte);
 
-			if (!TryReadNextByte(out nextByte) || nextByte <= WHITE_SPACE) {
+			if (!TryReadNextByte(out nextByte) || nextByte <= WHITE_SPACE_CODE) {
 				break;
 			}
 		}
@@ -271,6 +306,14 @@ public abstract class SolutionWithFastIO {
 		var res = new char[count];
 		for (var index = 0; index < count; ++index) {
 			res[index] = ReadChar();
+		}
+		return res;
+	}
+
+	public int[] ReadDigits(int count) {
+		var res = new int[count];
+		for (var index = 0; index < count; ++index) {
+			res[index] = ReadChar() - '0';
 		}
 		return res;
 	}
@@ -357,6 +400,7 @@ public abstract class SolutionWithFastIO {
 		}
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void WriteLine(int num) {
 		Write(num);
 		Write("\n");
@@ -388,6 +432,7 @@ public abstract class SolutionWithFastIO {
 		}
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void WriteLine(long num) {
 		Write(num);
 		Write("\n");
@@ -400,10 +445,12 @@ public abstract class SolutionWithFastIO {
 		}
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void WriteLine() {
 		this.WriteByteToOutBuffer((byte)'\n');
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void WriteLine(string message) {
 		this.Write(message);
 		this.WriteByteToOutBuffer((byte)'\n');
@@ -444,7 +491,7 @@ public abstract class SolutionWithFastIO {
 	private byte ReadNextByteSkipWhitespace() {
 		byte nextByte;
 		while (TryReadNextByte(out nextByte)) {
-			if (nextByte > WHITE_SPACE) {
+			if (nextByte > WHITE_SPACE_CODE) {
 				return nextByte;
 			}
 		}
