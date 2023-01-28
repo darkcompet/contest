@@ -1,45 +1,72 @@
+using System.Runtime.CompilerServices;
 using System;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
+using System.Collections.Generic;
 
-/// Run: cd Source && mcs Contest.cs && mono Contest.exe < ../Data/in.txt
+/// Run with stdin: cd Source && mcs Contest.cs && mono Contest.exe < ../Data/in.txt
 public class Contest : SolutionWithFastIO {
-	const long MOD = 998244353;
-
+	// Src: https://www.hackerearth.com/practice/algorithms/searching/linear-search/practice-problems/algorithm/equal-parity-zeros-25eb4114/?
 	protected override void Solve() {
-		var N = ReadInt();
-		var d1 = ReadDigits(N);
-		var d2 = ReadDigits(N);
+		var T = ReadInt();
+		while (T-- > 0) {
+			var N = ReadInt();
+			var arr = ReadInts(N);
 
-		for (var index = 0; index < N; ++index) {
-			if (d1[index] > d2[index]) {
-				var tmp = d1[index];
-				d1[index] = d2[index];
-				d2[index] = tmp;
+			var sum_diffs = new long[N];
+			sum_diffs[0] = arr[0];
+			for (var index = 1; index < N; ++index) {
+				sum_diffs[index] = sum_diffs[index - 1] + (((index & 1) == 0) ? arr[index] : -arr[index]);
+			}
+			WriteLine(Solve(arr, 0, N - 1, sum_diffs) ? "YES" : "NO");
+		}
+	}
+
+	// Each depth level should run at most N actions to archive time-complexity at N * log (N).
+	// That is, action-count should be approx with [leftIndex, rightIndex].
+	bool Solve(int[] arr, int leftIndex, int rightIndex, long[] sum_diffs) {
+		if (leftIndex >= rightIndex) {
+			// Mask here
+			if (leftIndex == rightIndex) {
+				return sum_diffs[arr.Length - 1] - (((leftIndex & 1) == 0) ? 2 * arr[leftIndex] : -2 * arr[leftIndex]) == 0;
+			}
+			return false;
+		}
+
+		// Make tree
+		var midIndex = (leftIndex + rightIndex) >> 1;
+		var left_result = Solve(arr, leftIndex, midIndex, sum_diffs);
+		if (left_result) {
+			return true;
+		}
+		var right_result = Solve(arr, midIndex + 1, rightIndex, sum_diffs);
+		if (right_result) {
+			return true;
+		}
+
+		// Mask in [left -> mid]
+		var leftmost_sumdiff = sum_diffs[midIndex];
+		var diffs_left = new HashSet<long>();
+		for (var index = midIndex; index >= leftIndex; --index) {
+			leftmost_sumdiff -= ((index & 1) == 0) ? 2 * arr[index] : -2 * arr[index];
+			diffs_left.Add(leftmost_sumdiff);
+		}
+
+		// Mask in [mid + 1 -> right]
+		var rightmost_sumdiff = sum_diffs[arr.Length - 1] - sum_diffs[midIndex];
+		var diffs_right = new HashSet<long>();
+		for (var index = midIndex + 1; index <= rightIndex; ++index) {
+			rightmost_sumdiff -= ((index & 1) == 0) ? 2 * arr[index] : -2 * arr[index];
+			diffs_right.Add(rightmost_sumdiff);
+		}
+
+		foreach (var diff in diffs_left) {
+			if (diffs_right.Contains(-diff)) {
+				return true;
 			}
 		}
 
-		// f(n) = a_n + x * f(n - 1)
-		// f(1) = a_1 + x * f(0)
-		// f(0) = a_0
-		// for(i: 0 -> n): f = a_i + x * f
-		var f1 = 0L;
-		var f2 = 0L;
-		for (var index = 0; index < N; ++index) {
-			f1 = mod_add(mod_mul(f1, 10), d1[index]);
-			f2 = mod_add(mod_mul(f2, 10), d2[index]);
-		}
-
-		WriteLine(mod_mul(f1, f2));
-	}
-
-	long mod_add(long a, long b) {
-		return (a + b) % MOD;
-	}
-
-	long mod_mul(long a, long b) {
-		return (a * b) % MOD;
+		return false;
 	}
 
 	public static void Main(string[] args) {
@@ -76,6 +103,9 @@ public abstract class SolutionWithFastIO {
 		this.inStream = Console.OpenStandardInput();
 		this.outStream = Console.OpenStandardOutput();
 
+		// var filePath = Path.GetFullPath("../Data/in.txt");
+		// inStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+
 		this.inBuffer = new byte[IN_BUFFER_SIZE];
 		this.outBuffer = new byte[OUT_BUFFER_SIZE];
 	}
@@ -91,20 +121,15 @@ public abstract class SolutionWithFastIO {
 		this.outStream.Close();
 	}
 
-	public void SetFilePath(string filePath) {
-		// filePath = Path.GetFullPath(filePath);
-		inStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-	}
-
 	public int ReadInt() {
 		var num = 0;
 
-		var nextByte = this.ReadNextByteSkipWhitespace();
+		var nextByte = this._ReadNextByteSkipWhitespace();
 
 		// Check negative value
 		var isNegative = (nextByte == '-');
 		if (isNegative) {
-			TryReadNextByte(out nextByte);
+			_TryReadNextByte(out nextByte);
 		}
 
 		// Assert digit
@@ -114,12 +139,12 @@ public abstract class SolutionWithFastIO {
 
 		while (true) {
 			num = (num << 1) + (num << 3) + nextByte - '0';
-			if (!TryReadNextByte(out nextByte)) {
+			if (!_TryReadNextByte(out nextByte)) {
 				break;
 			}
 			// Unread if we have read non-digit char
 			if (nextByte < '0' || nextByte > '9') {
-				UnreadNextByte();
+				_UnreadNextByte();
 				break;
 			}
 		}
@@ -130,12 +155,12 @@ public abstract class SolutionWithFastIO {
 	public long ReadLong() {
 		var num = 0L;
 
-		var nextByte = this.ReadNextByteSkipWhitespace();
+		var nextByte = this._ReadNextByteSkipWhitespace();
 
 		// Check negative value
 		var isNegative = (nextByte == '-');
 		if (isNegative) {
-			TryReadNextByte(out nextByte);
+			_TryReadNextByte(out nextByte);
 		}
 
 		// Assert digit
@@ -145,12 +170,12 @@ public abstract class SolutionWithFastIO {
 
 		while (true) {
 			num = (num << 1) + (num << 3) + nextByte - '0';
-			if (!TryReadNextByte(out nextByte)) {
+			if (!_TryReadNextByte(out nextByte)) {
 				break;
 			}
 			// Unread if we have read non-digit char
 			if (nextByte < '0' || nextByte > '9') {
-				UnreadNextByte();
+				_UnreadNextByte();
 				break;
 			}
 		}
@@ -162,12 +187,12 @@ public abstract class SolutionWithFastIO {
 		var pre = 0.0f;
 		var suf = 0.0f;
 
-		var nextByte = this.ReadNextByteSkipWhitespace();
+		var nextByte = this._ReadNextByteSkipWhitespace();
 
 		// Check negative value
 		bool isNegative = (nextByte == '-');
 		if (isNegative) {
-			TryReadNextByte(out nextByte);
+			_TryReadNextByte(out nextByte);
 		}
 
 		// Assert digit
@@ -178,7 +203,7 @@ public abstract class SolutionWithFastIO {
 		var endOfStream = false;
 		while (true) {
 			pre = 10 * pre + (nextByte - '0');
-			if (!TryReadNextByte(out nextByte)) {
+			if (!_TryReadNextByte(out nextByte)) {
 				endOfStream = true;
 				break;
 			}
@@ -189,7 +214,7 @@ public abstract class SolutionWithFastIO {
 
 		if (nextByte == '.') {
 			var div = 1.0f;
-			while (TryReadNextByte(out nextByte)) {
+			while (_TryReadNextByte(out nextByte)) {
 				if (nextByte < '0' || nextByte > '9') {
 					break;
 				}
@@ -198,7 +223,7 @@ public abstract class SolutionWithFastIO {
 		}
 		// Unread if we have read some `non-digit` char, and not `dot` char.
 		else if (!endOfStream) {
-			UnreadNextByte();
+			_UnreadNextByte();
 		}
 
 		return isNegative ? -(pre + suf) : (pre + suf);
@@ -208,12 +233,12 @@ public abstract class SolutionWithFastIO {
 		var pre = 0.0;
 		var suf = 0.0;
 
-		var nextByte = this.ReadNextByteSkipWhitespace();
+		var nextByte = this._ReadNextByteSkipWhitespace();
 
 		// Check negative value
 		bool isNegative = (nextByte == '-');
 		if (isNegative) {
-			TryReadNextByte(out nextByte);
+			_TryReadNextByte(out nextByte);
 		}
 
 		// Assert digit
@@ -224,7 +249,7 @@ public abstract class SolutionWithFastIO {
 		var endOfStream = false;
 		while (true) {
 			pre = 10 * pre + (nextByte - '0');
-			if (!TryReadNextByte(out nextByte)) {
+			if (!_TryReadNextByte(out nextByte)) {
 				endOfStream = true;
 				break;
 			}
@@ -235,7 +260,7 @@ public abstract class SolutionWithFastIO {
 
 		if (nextByte == '.') {
 			var div = 1.0;
-			while (TryReadNextByte(out nextByte)) {
+			while (_TryReadNextByte(out nextByte)) {
 				if (nextByte < '0' || nextByte > '9') {
 					break;
 				}
@@ -244,7 +269,7 @@ public abstract class SolutionWithFastIO {
 		}
 		// Unread if we have read some `non-digit` char, and not `dot` char.
 		else if (!endOfStream) {
-			UnreadNextByte();
+			_UnreadNextByte();
 		}
 
 		return isNegative ? -(pre + suf) : (pre + suf);
@@ -252,17 +277,17 @@ public abstract class SolutionWithFastIO {
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public char ReadChar() {
-		return (char)this.ReadNextByteSkipWhitespace();
+		return (char)this._ReadNextByteSkipWhitespace();
 	}
 
 	public string ReadString() {
-		var nextByte = this.ReadNextByteSkipWhitespace();
+		var nextByte = this._ReadNextByteSkipWhitespace();
 
 		var sb = new StringBuilder();
 		while (true) {
 			sb.Append((char)nextByte);
 
-			if (!TryReadNextByte(out nextByte) || nextByte <= WHITE_SPACE_CODE) {
+			if (!_TryReadNextByte(out nextByte) || nextByte <= WHITE_SPACE_CODE) {
 				break;
 			}
 		}
@@ -374,6 +399,14 @@ public abstract class SolutionWithFastIO {
 		return res;
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public void Write(byte b) {
+		if (this.nextWriteByteIndex >= OUT_BUFFER_SIZE) {
+			FlushOutBuffer();
+		}
+		this.outBuffer[this.nextWriteByteIndex++] = b;
+	}
+
 	public void Write(int num) {
 		// Mirror number to avoid write minus symbol
 		var outBuffer = this.outBuffer;
@@ -396,14 +429,8 @@ public abstract class SolutionWithFastIO {
 
 		// Write to buffer
 		for (var index = digitIndex - 1; index >= 0; --index) {
-			this.WriteByteToOutBuffer(scratchBytes[index]);
+			this.Write(scratchBytes[index]);
 		}
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void WriteLine(int num) {
-		Write(num);
-		Write("\n");
 	}
 
 	public void Write(long num) {
@@ -428,54 +455,51 @@ public abstract class SolutionWithFastIO {
 
 		// Write to buffer
 		for (var index = digitIndex - 1; index >= 0; --index) {
-			this.WriteByteToOutBuffer(scratchBytes[index]);
+			this.Write(scratchBytes[index]);
 		}
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void WriteLine(long num) {
-		Write(num);
-		Write("\n");
 	}
 
 	public void Write(string message) {
 		var bytes = Encoding.ASCII.GetBytes(message);
 		for (int index = 0, count = bytes.Length; index < count; ++index) {
-			this.WriteByteToOutBuffer((byte)bytes[index]);
+			this.Write((byte)bytes[index]);
 		}
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void WriteLine() {
-		this.WriteByteToOutBuffer((byte)'\n');
+		this.Write((byte)'\n');
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public void WriteLine(int num) {
+		Write(num);
+		Write(((byte)'\n'));
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public void WriteLine(long num) {
+		Write(num);
+		Write(((byte)'\n'));
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void WriteLine(string message) {
 		this.Write(message);
-		this.WriteByteToOutBuffer((byte)'\n');
+		this.Write((byte)'\n');
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void WriteByteToOutBuffer(byte b) {
-		if (this.nextWriteByteIndex >= OUT_BUFFER_SIZE) {
-			FlushOutBuffer();
-		}
-		this.outBuffer[this.nextWriteByteIndex++] = b;
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void FlushOutBuffer() {
+	protected void FlushOutBuffer() {
 		this.outStream.Write(this.outBuffer, 0, this.nextWriteByteIndex);
 		this.outStream.Flush();
 		this.nextWriteByteIndex = 0;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private bool TryReadNextByte(out byte result) {
-		var inBuffer = this.inBuffer;
+	private bool _TryReadNextByte(out byte result) {
 		if (this.nextReadByteIndex >= this.readByteCount) {
-			this.readByteCount = this.inStream.Read(inBuffer, 0, IN_BUFFER_SIZE);
+			this.readByteCount = this.inStream.Read(this.inBuffer, 0, IN_BUFFER_SIZE);
 			this.nextReadByteIndex = 0;
 
 			if (this.readByteCount <= 0) {
@@ -483,14 +507,14 @@ public abstract class SolutionWithFastIO {
 				return false;
 			}
 		}
-		result = inBuffer[this.nextReadByteIndex++];
+		result = this.inBuffer[this.nextReadByteIndex++];
 		return true;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private byte ReadNextByteSkipWhitespace() {
+	private byte _ReadNextByteSkipWhitespace() {
 		byte nextByte;
-		while (TryReadNextByte(out nextByte)) {
+		while (_TryReadNextByte(out nextByte)) {
 			if (nextByte > WHITE_SPACE_CODE) {
 				return nextByte;
 			}
@@ -499,12 +523,16 @@ public abstract class SolutionWithFastIO {
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void UnreadNextByte() {
+	private void _UnreadNextByte() {
 		if (this.nextReadByteIndex <= 0) {
 			throw new Exception("Cannot unread more");
 		}
 		--this.nextReadByteIndex;
 	}
+
+	///
+	/// Utilities
+	///
 
 	protected static void Debug(string message) {
 		Console.WriteLine(message);
