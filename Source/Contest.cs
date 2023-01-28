@@ -4,81 +4,12 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 
-/// Run with stdin: cd Source && mcs Contest.cs && mono Contest.exe < ../Data/in.txt
-public class Contest : SolutionWithFastIO {
-	// Src: https://www.hackerearth.com/practice/algorithms/searching/linear-search/practice-problems/algorithm/equal-parity-zeros-25eb4114/?
-	protected override void Solve() {
-		var T = ReadInt();
-		while (T-- > 0) {
-			var N = ReadInt();
-			var arr = ReadInts(N);
-
-			var sum_diffs = new long[N];
-			sum_diffs[0] = arr[0];
-			for (var index = 1; index < N; ++index) {
-				sum_diffs[index] = sum_diffs[index - 1] + (((index & 1) == 0) ? arr[index] : -arr[index]);
-			}
-			WriteLine(Solve(arr, 0, N - 1, sum_diffs) ? "YES" : "NO");
-		}
-	}
-
-	// Each depth level should run at most N actions to archive time-complexity at N * log (N).
-	// That is, action-count should be approx with [leftIndex, rightIndex].
-	bool Solve(int[] arr, int leftIndex, int rightIndex, long[] sum_diffs) {
-		if (leftIndex >= rightIndex) {
-			// Mask here
-			if (leftIndex == rightIndex) {
-				return sum_diffs[arr.Length - 1] - (((leftIndex & 1) == 0) ? 2 * arr[leftIndex] : -2 * arr[leftIndex]) == 0;
-			}
-			return false;
-		}
-
-		// Make tree
-		var midIndex = (leftIndex + rightIndex) >> 1;
-		var left_result = Solve(arr, leftIndex, midIndex, sum_diffs);
-		if (left_result) {
-			return true;
-		}
-		var right_result = Solve(arr, midIndex + 1, rightIndex, sum_diffs);
-		if (right_result) {
-			return true;
-		}
-
-		// Mask in [left -> mid]
-		var leftmost_sumdiff = sum_diffs[midIndex];
-		var diffs_left = new HashSet<long>();
-		for (var index = midIndex; index >= leftIndex; --index) {
-			leftmost_sumdiff -= ((index & 1) == 0) ? 2 * arr[index] : -2 * arr[index];
-			diffs_left.Add(leftmost_sumdiff);
-		}
-
-		// Mask in [mid + 1 -> right]
-		var rightmost_sumdiff = sum_diffs[arr.Length - 1] - sum_diffs[midIndex];
-		var diffs_right = new HashSet<long>();
-		for (var index = midIndex + 1; index <= rightIndex; ++index) {
-			rightmost_sumdiff -= ((index & 1) == 0) ? 2 * arr[index] : -2 * arr[index];
-			diffs_right.Add(rightmost_sumdiff);
-		}
-
-		foreach (var diff in diffs_left) {
-			if (diffs_right.Contains(-diff)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public static void Main(string[] args) {
-		new Contest().Start();
-	}
-}
-
 /// This performs read/write on ASCII bytes which be in range [0, 255].
 /// See: https://www.asciitable.com/
-/// Ref: /// https://github.com/davidsekar/C-sharp-Programming-IO/blob/master/ConsoleInOut/InputOutput.cs
+/// Ref: https://github.com/davidsekar/C-sharp-Programming-IO/blob/master/ConsoleInOut/InputOutput.cs
 public abstract class SolutionWithFastIO {
-	/// Subclass should perform solution inside this method
+	protected virtual bool inputFromFile { get; set; }
+	protected virtual bool outputToFile { get; set; }
 	protected abstract void Solve();
 
 	/// White space chars: space, tab, linefeed
@@ -100,11 +31,13 @@ public abstract class SolutionWithFastIO {
 	private readonly byte[] scratchBytes = new byte[32];
 
 	public SolutionWithFastIO() {
-		this.inStream = Console.OpenStandardInput();
-		this.outStream = Console.OpenStandardOutput();
+		this.inStream = this.inputFromFile ?
+			new FileStream(Path.GetFullPath("../Data/in.txt"), FileMode.Open, FileAccess.Read, FileShare.ReadWrite) :
+			Console.OpenStandardInput();
 
-		// var filePath = Path.GetFullPath("../Data/in.txt");
-		// inStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+		this.outStream = this.outputToFile ?
+			new FileStream(Path.GetFullPath("../Data/out.txt"), FileMode.Open, FileAccess.Write, FileShare.ReadWrite) :
+			Console.OpenStandardOutput();
 
 		this.inBuffer = new byte[IN_BUFFER_SIZE];
 		this.outBuffer = new byte[OUT_BUFFER_SIZE];
@@ -540,5 +473,19 @@ public abstract class SolutionWithFastIO {
 
 	protected long Now() {
 		return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+	}
+}
+
+/// Run with stdin: cd Source && mcs Contest.cs && mono Contest.exe < ../Data/in.txt
+public class Contest : SolutionWithFastIO {
+	// protected override bool inputFromFile => true;
+	// protected override bool outputToFile => true;
+
+	public static void Main(string[] args) {
+		new Contest().Start();
+	}
+
+	// 
+	protected override void Solve() {
 	}
 }
