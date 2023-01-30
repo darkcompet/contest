@@ -485,7 +485,7 @@ public class Contest : SolutionWithFastIO {
 		new Contest().Start();
 	}
 
-	// 
+	//
 	protected override void Solve() {
 	}
 }
