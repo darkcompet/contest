@@ -487,5 +487,86 @@ public class Contest : SolutionWithFastIO {
 
 	//
 	protected override void Solve() {
+		int N = ReadInt();
+		var nodes = new Node[N];
+
+		var old2node = new Dictionary<string, Node>();
+		var new2node = new Dictionary<string, Node>();
+		for (var index = 0; index < N; ++index) {
+			var node = nodes[index] = new Node(index, ReadString(), ReadString());
+
+			if (!old2node.TryAdd(node.a, node) || !new2node.TryAdd(node.b, node)) {
+				WriteLine("No");
+				return;
+			}
+		}
+
+		var children = new List<int>[N];
+		for (var index = 0; index < N; ++index) {
+			children[index] = new List<int>();
+		}
+		for (var index = 0; index < N; ++index) {
+			var node = nodes[index];
+			if (old2node.TryGetValue(node.b, out var oldNode)) {
+				children[oldNode.index].Add(index);
+			}
+		}
+
+		for (var v = 0; v < N; ++v) {
+			if (nodes[v].visited) {
+				continue;
+			}
+
+			var stack = new Stack<int>();
+			stack.Push(v);
+
+			var curPath = new HashSet<int>();
+
+			while (stack.Count > 0) {
+				var p = stack.Pop();
+
+				nodes[p].visited = true;
+				curPath.Add(p);
+
+				// Add children for next traversal
+				var added = false;
+				foreach (var c in children[p]) {
+					if (nodes[c].visited) {
+						if (curPath.Contains(c)) { // -> has cycle
+							WriteLine("No");
+							return;
+						}
+						continue;
+					}
+					stack.Push(c);
+					added = true;
+				}
+
+				// Backtrack if no child
+				if (!added) {
+					curPath.Remove(p);
+				}
+			}
+		}
+
+		WriteLine("Yes");
+	}
+
+	private class Node {
+		public int index;
+		public string a;
+		public string b;
+
+		public bool visited;
+
+		public Node(int index, string a, string b) {
+			this.index = index;
+			this.a = a;
+			this.b = b;
+		}
+
+		public override string ToString() {
+			return $"{index}: {a}->{b}";
+		}
 	}
 }
