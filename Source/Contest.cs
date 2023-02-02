@@ -3,10 +3,13 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
 
-/// This performs read/write on ASCII bytes which be in range [0, 255].
+/// This performs read/write on ASCII chars which be in range [0, 255].
 /// See: https://www.asciitable.com/
-/// Ref: https://github.com/davidsekar/C-sharp-Programming-IO/blob/master/ConsoleInOut/InputOutput.cs
+
+/// TechNotes:
+/// - In dotnet, can use hyphen (_) to separate/group long number. But it does not word in mono.
 public abstract class SolutionWithFastIO {
 	protected virtual bool inputFromFile { get; set; }
 	protected virtual bool outputToFile { get; set; }
@@ -24,7 +27,7 @@ public abstract class SolutionWithFastIO {
 	private int nextReadByteIndex;
 	private int readByteCount;
 
-	private readonly byte[] outBuffer;
+	private readonly byte[] outChars;
 	private int nextWriteByteIndex;
 
 	/// To store bytes for int, long when write
@@ -40,7 +43,7 @@ public abstract class SolutionWithFastIO {
 			Console.OpenStandardOutput();
 
 		this.inBuffer = new byte[IN_BUFFER_SIZE];
-		this.outBuffer = new byte[OUT_BUFFER_SIZE];
+		this.outChars = new byte[OUT_BUFFER_SIZE];
 	}
 
 	protected void Start() {
@@ -57,26 +60,26 @@ public abstract class SolutionWithFastIO {
 	public int ReadInt() {
 		var num = 0;
 
-		var nextByte = this._ReadNextByteSkipWhitespace();
+		var nextChar = this._ReadNextByteSkipWhitespace();
 
 		// Check negative value
-		var isNegative = (nextByte == '-');
+		var isNegative = (nextChar == '-');
 		if (isNegative) {
-			_TryReadNextByte(out nextByte);
+			_TryReadNextByte(out nextChar);
 		}
 
 		// Assert digit
-		if (nextByte < '0' || nextByte > '9') {
+		if (nextChar < '0' || nextChar > '9') {
 			throw new Exception("Digit expected");
 		}
 
 		while (true) {
-			num = (num << 1) + (num << 3) + nextByte - '0';
-			if (!_TryReadNextByte(out nextByte)) {
+			num = (num << 1) + (num << 3) + nextChar - '0';
+			if (!_TryReadNextByte(out nextChar)) {
 				break;
 			}
 			// Unread if we have read non-digit char
-			if (nextByte < '0' || nextByte > '9') {
+			if (nextChar < '0' || nextChar > '9') {
 				_UnreadNextByte();
 				break;
 			}
@@ -88,26 +91,26 @@ public abstract class SolutionWithFastIO {
 	public long ReadLong() {
 		var num = 0L;
 
-		var nextByte = this._ReadNextByteSkipWhitespace();
+		var nextChar = this._ReadNextByteSkipWhitespace();
 
 		// Check negative value
-		var isNegative = (nextByte == '-');
+		var isNegative = (nextChar == '-');
 		if (isNegative) {
-			_TryReadNextByte(out nextByte);
+			_TryReadNextByte(out nextChar);
 		}
 
 		// Assert digit
-		if (nextByte < '0' || nextByte > '9') {
+		if (nextChar < '0' || nextChar > '9') {
 			throw new Exception("Digit expected");
 		}
 
 		while (true) {
-			num = (num << 1) + (num << 3) + nextByte - '0';
-			if (!_TryReadNextByte(out nextByte)) {
+			num = (num << 1) + (num << 3) + nextChar - '0';
+			if (!_TryReadNextByte(out nextChar)) {
 				break;
 			}
 			// Unread if we have read non-digit char
-			if (nextByte < '0' || nextByte > '9') {
+			if (nextChar < '0' || nextChar > '9') {
 				_UnreadNextByte();
 				break;
 			}
@@ -120,38 +123,38 @@ public abstract class SolutionWithFastIO {
 		var pre = 0.0f;
 		var suf = 0.0f;
 
-		var nextByte = this._ReadNextByteSkipWhitespace();
+		var nextChar = this._ReadNextByteSkipWhitespace();
 
 		// Check negative value
-		bool isNegative = (nextByte == '-');
+		bool isNegative = (nextChar == '-');
 		if (isNegative) {
-			_TryReadNextByte(out nextByte);
+			_TryReadNextByte(out nextChar);
 		}
 
 		// Assert digit
-		if (nextByte < '0' || nextByte > '9') {
+		if (nextChar < '0' || nextChar > '9') {
 			throw new Exception("Digit expected");
 		}
 
 		var endOfStream = false;
 		while (true) {
-			pre = 10 * pre + (nextByte - '0');
-			if (!_TryReadNextByte(out nextByte)) {
+			pre = 10 * pre + (nextChar - '0');
+			if (!_TryReadNextByte(out nextChar)) {
 				endOfStream = true;
 				break;
 			}
-			if (nextByte < '0' || nextByte > '9') {
+			if (nextChar < '0' || nextChar > '9') {
 				break;
 			}
 		}
 
-		if (nextByte == '.') {
+		if (nextChar == '.') {
 			var div = 1.0f;
-			while (_TryReadNextByte(out nextByte)) {
-				if (nextByte < '0' || nextByte > '9') {
+			while (_TryReadNextByte(out nextChar)) {
+				if (nextChar < '0' || nextChar > '9') {
 					break;
 				}
-				suf += (nextByte - '0') / (div *= 10);
+				suf += (nextChar - '0') / (div *= 10);
 			}
 		}
 		// Unread if we have read some `non-digit` char, and not `dot` char.
@@ -166,38 +169,38 @@ public abstract class SolutionWithFastIO {
 		var pre = 0.0;
 		var suf = 0.0;
 
-		var nextByte = this._ReadNextByteSkipWhitespace();
+		var nextChar = this._ReadNextByteSkipWhitespace();
 
 		// Check negative value
-		bool isNegative = (nextByte == '-');
+		bool isNegative = (nextChar == '-');
 		if (isNegative) {
-			_TryReadNextByte(out nextByte);
+			_TryReadNextByte(out nextChar);
 		}
 
 		// Assert digit
-		if (nextByte < '0' || nextByte > '9') {
+		if (nextChar < '0' || nextChar > '9') {
 			throw new Exception("Digit expected");
 		}
 
 		var endOfStream = false;
 		while (true) {
-			pre = 10 * pre + (nextByte - '0');
-			if (!_TryReadNextByte(out nextByte)) {
+			pre = 10 * pre + (nextChar - '0');
+			if (!_TryReadNextByte(out nextChar)) {
 				endOfStream = true;
 				break;
 			}
-			if (nextByte < '0' || nextByte > '9') {
+			if (nextChar < '0' || nextChar > '9') {
 				break;
 			}
 		}
 
-		if (nextByte == '.') {
+		if (nextChar == '.') {
 			var div = 1.0;
-			while (_TryReadNextByte(out nextByte)) {
-				if (nextByte < '0' || nextByte > '9') {
+			while (_TryReadNextByte(out nextChar)) {
+				if (nextChar < '0' || nextChar > '9') {
 					break;
 				}
-				suf += (nextByte - '0') / (div *= 10);
+				suf += (nextChar - '0') / (div *= 10);
 			}
 		}
 		// Unread if we have read some `non-digit` char, and not `dot` char.
@@ -333,70 +336,67 @@ public abstract class SolutionWithFastIO {
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Write(byte b) {
+	public void Write(char ch) {
+		this.Write((byte)ch);
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public void Write(byte ch) {
 		if (this.nextWriteByteIndex >= OUT_BUFFER_SIZE) {
 			FlushOutBuffer();
 		}
-		this.outBuffer[this.nextWriteByteIndex++] = b;
+		this.outChars[this.nextWriteByteIndex++] = ch;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public void Write(byte[] arr, int fromIndex, int count) {
+		if (this.nextWriteByteIndex + count >= OUT_BUFFER_SIZE) {
+			FlushOutBuffer();
+		}
+		Array.Copy(arr, fromIndex, this.outChars, this.nextWriteByteIndex, count);
+		this.nextWriteByteIndex += count;
 	}
 
 	public void Write(int num) {
-		// Mirror number to avoid write minus symbol
-		var outBuffer = this.outBuffer;
-		if (num < 0) {
-			if (this.nextWriteByteIndex >= OUT_BUFFER_SIZE) {
-				FlushOutBuffer();
-			}
-			outBuffer[this.nextWriteByteIndex] = (byte)'-';
-			num = -num;
-		}
+		var tmpArr = this.scratchBytes;
+		var curIndex = tmpArr.Length;
+		var isNegative = num < 0;
 
-		// Convert num to bytes
-		var scratchBytes = this.scratchBytes;
-		var digitIndex = 0;
 		do {
-			scratchBytes[digitIndex++] = (byte)((num % 10) + '0');
+			tmpArr[--curIndex] = (byte)((isNegative ? -(num % 10) : (num % 10)) + '0');
 			num /= 10;
 		}
-		while (num > 0);
+		while (num != 0);
 
 		// Write to buffer
-		for (var index = digitIndex - 1; index >= 0; --index) {
-			this.Write(scratchBytes[index]);
+		if (isNegative) {
+			this.Write((byte)'-');
 		}
+		this.Write(tmpArr, curIndex, tmpArr.Length - curIndex);
 	}
 
 	public void Write(long num) {
-		// Mirror number to avoid write minus symbol
-		var outBuffer = this.outBuffer;
-		if (num < 0) {
-			if (this.nextWriteByteIndex >= OUT_BUFFER_SIZE) {
-				FlushOutBuffer();
-			}
-			outBuffer[this.nextWriteByteIndex] = (byte)'-';
-			num = -num;
-		}
+		var tmpArr = this.scratchBytes;
+		var curIndex = tmpArr.Length;
+		var isNegative = num < 0;
 
-		// Convert num to bytes
-		var scratchBytes = this.scratchBytes;
-		var digitIndex = 0;
 		do {
-			scratchBytes[digitIndex++] = (byte)((num % 10) + '0');
+			tmpArr[--curIndex] = (byte)((isNegative ? -(num % 10) : (num % 10)) + '0');
 			num /= 10;
 		}
-		while (num > 0);
+		while (num != 0);
 
 		// Write to buffer
-		for (var index = digitIndex - 1; index >= 0; --index) {
-			this.Write(scratchBytes[index]);
+		if (isNegative) {
+			this.Write((byte)'-');
 		}
+		this.Write(tmpArr, curIndex, tmpArr.Length - curIndex);
 	}
 
-	public void Write(string message) {
-		var bytes = Encoding.ASCII.GetBytes(message);
-		for (int index = 0, count = bytes.Length; index < count; ++index) {
-			this.Write((byte)bytes[index]);
-		}
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public void Write(string text) {
+		var arr = Encoding.ASCII.GetBytes(text);
+		this.Write(arr, 0, arr.Length);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -417,14 +417,14 @@ public abstract class SolutionWithFastIO {
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void WriteLine(string message) {
-		this.Write(message);
+	public void WriteLine(string text) {
+		this.Write(text);
 		this.Write((byte)'\n');
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	protected void FlushOutBuffer() {
-		this.outStream.Write(this.outBuffer, 0, this.nextWriteByteIndex);
+		this.outStream.Write(this.outChars, 0, this.nextWriteByteIndex);
 		this.outStream.Flush();
 		this.nextWriteByteIndex = 0;
 	}
@@ -457,20 +457,16 @@ public abstract class SolutionWithFastIO {
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void _UnreadNextByte() {
-		if (this.nextReadByteIndex <= 0) {
+		if (this.nextReadByteIndex-- <= 0) {
 			throw new Exception("Cannot unread more");
 		}
-		--this.nextReadByteIndex;
 	}
 
 	///
 	/// Utilities
 	///
 
-	protected static void Debug(string message) {
-		Console.WriteLine(message);
-	}
-
+	/// Utc epoch time.
 	protected long Now() {
 		return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 	}
@@ -487,86 +483,11 @@ public class Contest : SolutionWithFastIO {
 
 	//
 	protected override void Solve() {
-		int N = ReadInt();
-		var nodes = new Node[N];
+		// [12] (3) (4) [56] [79] (8)
+		//  0    1   2   3    4    5
+		var N = 100_000 + ReadInt() - 1;
+		var a = N.ToString().ToCharArray();
 
-		var old2node = new Dictionary<string, Node>();
-		var new2node = new Dictionary<string, Node>();
-		for (var index = 0; index < N; ++index) {
-			var node = nodes[index] = new Node(index, ReadString(), ReadString());
-
-			if (!old2node.TryAdd(node.a, node) || !new2node.TryAdd(node.b, node)) {
-				WriteLine("No");
-				return;
-			}
-		}
-
-		var children = new List<int>[N];
-		for (var index = 0; index < N; ++index) {
-			children[index] = new List<int>();
-		}
-		for (var index = 0; index < N; ++index) {
-			var node = nodes[index];
-			if (old2node.TryGetValue(node.b, out var oldNode)) {
-				children[oldNode.index].Add(index);
-			}
-		}
-
-		for (var v = 0; v < N; ++v) {
-			if (nodes[v].visited) {
-				continue;
-			}
-
-			var stack = new Stack<int>();
-			stack.Push(v);
-
-			var curPath = new HashSet<int>();
-
-			while (stack.Count > 0) {
-				var p = stack.Pop();
-
-				nodes[p].visited = true;
-				curPath.Add(p);
-
-				// Add children for next traversal
-				var added = false;
-				foreach (var c in children[p]) {
-					if (nodes[c].visited) {
-						if (curPath.Contains(c)) { // -> has cycle
-							WriteLine("No");
-							return;
-						}
-						continue;
-					}
-					stack.Push(c);
-					added = true;
-				}
-
-				// Backtrack if no child
-				if (!added) {
-					curPath.Remove(p);
-				}
-			}
-		}
-
-		WriteLine("Yes");
-	}
-
-	private class Node {
-		public int index;
-		public string a;
-		public string b;
-
-		public bool visited;
-
-		public Node(int index, string a, string b) {
-			this.index = index;
-			this.a = a;
-			this.b = b;
-		}
-
-		public override string ToString() {
-			return $"{index}: {a}->{b}";
-		}
+		WriteLine($"{a[0]}{a[0]}{a[1]}{a[2]}{a[3]}{a[3]}{a[4]}{a[5]}{a[4]}");
 	}
 }
