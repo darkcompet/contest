@@ -2,9 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+		<NoWarn>$(NoWarn);1591;CA1708;CA2211;CS1573;CS8618;CS1570;CS8981;CA2201;CA1050;CA1051;CS7022;CA1852;</NoWarn>
   </PropertyGroup>
 
 </Project>

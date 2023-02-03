@@ -467,7 +467,7 @@ public abstract class SolutionWithFastIO {
 	///
 
 	/// Utc epoch time.
-	protected long Now() {
+	protected static long Now() {
 		return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 	}
 }
@@ -481,13 +481,6 @@ public class Contest : SolutionWithFastIO {
 		new Contest().Start();
 	}
 
-	//
 	protected override void Solve() {
-		// [12] (3) (4) [56] [79] (8)
-		//  0    1   2   3    4    5
-		var N = 100_000 + ReadInt() - 1;
-		var a = N.ToString().ToCharArray();
-
-		WriteLine($"{a[0]}{a[0]}{a[1]}{a[2]}{a[3]}{a[3]}{a[4]}{a[5]}{a[4]}");
 	}
 }
