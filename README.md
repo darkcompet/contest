@@ -21,6 +21,10 @@ This project is written mainly in C# and should be run with Mono.
 
 	# Init git
 	git init
+
+	# Add submodules
+	mkdir -p Tool/Compet; cd Tool/Compet;
+	git submodule add https://github.com/darkcompet/csharp-core.git
 	```
 
 
