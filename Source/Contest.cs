@@ -9,7 +9,7 @@ using System.Linq;
 /// See: https://www.asciitable.com/
 
 /// TechNotes:
-/// - In dotnet, can use hyphen (_) to separate/group long number. But it does not word in mono.
+/// - In dotnet, can use hyphen (_) to separate/group long number. But it does not work in mono.
 public abstract class SolutionWithFastIO {
 	protected virtual bool inputFromFile { get; set; }
 	protected virtual bool outputToFile { get; set; }
@@ -57,7 +57,7 @@ public abstract class SolutionWithFastIO {
 		this.outStream.Close();
 	}
 
-	public int ReadInt() {
+	public int ni() {
 		var num = 0;
 
 		var nextChar = this._ReadNextByteSkipWhitespace();
@@ -88,7 +88,7 @@ public abstract class SolutionWithFastIO {
 		return isNegative ? -num : num;
 	}
 
-	public long ReadLong() {
+	public long nl() {
 		var num = 0L;
 
 		var nextChar = this._ReadNextByteSkipWhitespace();
@@ -119,7 +119,7 @@ public abstract class SolutionWithFastIO {
 		return isNegative ? -num : num;
 	}
 
-	public float ReadFloat() {
+	public float nf() {
 		var pre = 0.0f;
 		var suf = 0.0f;
 
@@ -165,7 +165,7 @@ public abstract class SolutionWithFastIO {
 		return isNegative ? -(pre + suf) : (pre + suf);
 	}
 
-	public double ReadDouble() {
+	public double nd() {
 		var pre = 0.0;
 		var suf = 0.0;
 
@@ -212,11 +212,11 @@ public abstract class SolutionWithFastIO {
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public char ReadChar() {
+	public char nc() {
 		return (char)this._ReadNextByteSkipWhitespace();
 	}
 
-	public string ReadString() {
+	public string ns() {
 		var nextByte = this._ReadNextByteSkipWhitespace();
 
 		var sb = new StringBuilder();
@@ -231,117 +231,109 @@ public abstract class SolutionWithFastIO {
 		return sb.ToString();
 	}
 
-	public int[] ReadInts(int count) {
+	public int[] ni(int count) {
 		var res = new int[count];
 		for (var index = 0; index < count; ++index) {
-			res[index] = ReadInt();
+			res[index] = ni();
 		}
 		return res;
 	}
 
-	public long[] ReadLongs(int count) {
+	public long[] nl(int count) {
 		var res = new long[count];
 		for (var index = 0; index < count; ++index) {
-			res[index] = ReadLong();
+			res[index] = nl();
 		}
 		return res;
 	}
 
-	public float[] ReadFloats(int count) {
+	public float[] nf(int count) {
 		var res = new float[count];
 		for (var index = 0; index < count; ++index) {
-			res[index] = ReadFloat();
+			res[index] = nf();
 		}
 		return res;
 	}
 
-	public double[] ReadDoubles(int count) {
+	public double[] nd(int count) {
 		var res = new double[count];
 		for (var index = 0; index < count; ++index) {
-			res[index] = ReadDouble();
+			res[index] = nd();
 		}
 		return res;
 	}
 
-	public char[] ReadChars(int count) {
+	public char[] nc(int count) {
 		var res = new char[count];
 		for (var index = 0; index < count; ++index) {
-			res[index] = ReadChar();
+			res[index] = nc();
 		}
 		return res;
 	}
 
-	public int[] ReadDigits(int count) {
-		var res = new int[count];
-		for (var index = 0; index < count; ++index) {
-			res[index] = ReadChar() - '0';
-		}
-		return res;
-	}
-
-	public string[] ReadStrings(int count) {
+	public string[] ns(int count) {
 		var res = new string[count];
 		for (var index = 0; index < count; ++index) {
-			res[index] = ReadString();
+			res[index] = ns();
 		}
 		return res;
 	}
 
-	public int[][] ReadInts(int rowCount, int colCount) {
+	public int[][] ni(int rowCount, int colCount) {
 		var res = new int[rowCount][];
 		for (var index = 0; index < rowCount; ++index) {
-			res[index] = ReadInts(colCount);
+			res[index] = ni(colCount);
 		}
 		return res;
 	}
 
-	public long[][] ReadLongs(int rowCount, int colCount) {
+	public long[][] nl(int rowCount, int colCount) {
 		var res = new long[rowCount][];
 		for (var index = 0; index < rowCount; ++index) {
-			res[index] = ReadLongs(colCount);
+			res[index] = nl(colCount);
 		}
 		return res;
 	}
 
-	public float[][] ReadFloats(int rowCount, int colCount) {
+	public float[][] nf(int rowCount, int colCount) {
 		var res = new float[rowCount][];
 		for (var index = 0; index < rowCount; ++index) {
-			res[index] = ReadFloats(colCount);
+			res[index] = nf(colCount);
 		}
 		return res;
 	}
 
-	public double[][] ReadDoubles(int rowCount, int colCount) {
+	public double[][] nd(int rowCount, int colCount) {
 		var res = new double[rowCount][];
 		for (var index = 0; index < rowCount; ++index) {
-			res[index] = ReadDoubles(colCount);
+			res[index] = nd(colCount);
 		}
 		return res;
 	}
 
-	public char[][] ReadChars(int rowCount, int colCount) {
+	public char[][] nc(int rowCount, int colCount) {
 		var res = new char[rowCount][];
 		for (var index = 0; index < rowCount; ++index) {
-			res[index] = ReadChars(colCount);
+			res[index] = nc(colCount);
 		}
 		return res;
 	}
 
-	public string[][] ReadStrings(int rowCount, int colCount) {
+	public string[][] ns(int rowCount, int colCount) {
 		var res = new string[rowCount][];
 		for (var index = 0; index < rowCount; ++index) {
-			res[index] = ReadStrings(colCount);
+			res[index] = ns(colCount);
 		}
 		return res;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Write(char ch) {
-		this.Write((byte)ch);
+	public void print(char ch) {
+		this.print((byte)ch);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Write(byte ch) {
+	public void print(byte ch) {
 		if (this.nextWriteByteIndex >= OUT_BUFFER_SIZE) {
 			FlushOutBuffer();
 		}
@@ -349,7 +341,7 @@ public abstract class SolutionWithFastIO {
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Write(byte[] arr, int fromIndex, int count) {
+	public void print(byte[] arr, int fromIndex, int count) {
 		if (this.nextWriteByteIndex + count >= OUT_BUFFER_SIZE) {
 			FlushOutBuffer();
 		}
@@ -357,7 +349,7 @@ public abstract class SolutionWithFastIO {
 		this.nextWriteByteIndex += count;
 	}
 
-	public void Write(int num) {
+	public void print(int num) {
 		var tmpArr = this.scratchBytes;
 		var curIndex = tmpArr.Length;
 		var isNegative = num < 0;
@@ -370,12 +362,12 @@ public abstract class SolutionWithFastIO {
 
 		// Write to buffer
 		if (isNegative) {
-			this.Write((byte)'-');
+			this.print((byte)'-');
 		}
-		this.Write(tmpArr, curIndex, tmpArr.Length - curIndex);
+		this.print(tmpArr, curIndex, tmpArr.Length - curIndex);
 	}
 
-	public void Write(long num) {
+	public void print(long num) {
 		var tmpArr = this.scratchBytes;
 		var curIndex = tmpArr.Length;
 		var isNegative = num < 0;
@@ -388,38 +380,38 @@ public abstract class SolutionWithFastIO {
 
 		// Write to buffer
 		if (isNegative) {
-			this.Write((byte)'-');
+			this.print((byte)'-');
 		}
-		this.Write(tmpArr, curIndex, tmpArr.Length - curIndex);
+		this.print(tmpArr, curIndex, tmpArr.Length - curIndex);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Write(string text) {
+	public void print(string text) {
 		var arr = Encoding.ASCII.GetBytes(text);
-		this.Write(arr, 0, arr.Length);
+		this.print(arr, 0, arr.Length);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void WriteLine() {
-		this.Write((byte)'\n');
+	public void println() {
+		this.print((byte)'\n');
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void WriteLine(int num) {
-		Write(num);
-		Write(((byte)'\n'));
+	public void println(int num) {
+		print(num);
+		print(((byte)'\n'));
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void WriteLine(long num) {
-		Write(num);
-		Write(((byte)'\n'));
+	public void println(long num) {
+		print(num);
+		print(((byte)'\n'));
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void WriteLine(string text) {
-		this.Write(text);
-		this.Write((byte)'\n');
+	public void println(string text) {
+		this.print(text);
+		this.print((byte)'\n');
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -462,17 +454,13 @@ public abstract class SolutionWithFastIO {
 		}
 	}
 
-	///
-	/// Utilities
-	///
-
-	/// Utc epoch time.
+	/// Utc epoch time in millis.
 	protected static long Now() {
 		return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 	}
 }
 
-/// Run with stdin: cd Source && mcs Contest.cs && mono Contest.exe < ../Data/in.txt
+/// mcs ./Source/Contest.cs && mono ./Source/Contest.exe < ./Source/in.txt
 public class Contest : SolutionWithFastIO {
 	// protected override bool inputFromFile => true;
 	// protected override bool outputToFile => true;
@@ -481,74 +469,8 @@ public class Contest : SolutionWithFastIO {
 		new Contest().Start();
 	}
 
+	/// C++: https://atcoder.jp/contests/abc310/submissions/43606683
+	/// C#: https://atcoder.jp/contests/abc310/submissions/43585432
 	protected override void Solve() {
-		var arr = new int[] { 3, 2, 1 };
-		WriteLine(CountInversions(arr));
-	}
-
-	int CountInversions(int[] arr) {
-		return CountInversions(arr, 0, arr.Length - 1);
-	}
-
-	int CountInversions(int[] arr, int startIndex, int endIndex) {
-		if (startIndex >= endIndex) {
-			return 0;
-		}
-
-		// Divide and Conquer (on independent subarray)
-		var midIndex = (startIndex + endIndex) >> 1;
-		var leftResult = CountInversions(arr, startIndex, midIndex);
-		var rightResult = CountInversions(arr, midIndex + 1, endIndex);
-
-		return leftResult + rightResult + binaryResult(arr, startIndex, midIndex, midIndex + 1, endIndex);
-	}
-
-	private int binaryResult(int[] arr, int start1, int end1, int start2, int end2) {
-		Array.Sort(arr, start2, end2 - start2 + 1);
-
-		var ans = 0;
-		for (var index = start1; index <= end1; ++index) {
-			var smallerIndex = findIndexOfSmaller(arr, arr[index], start2, end2);
-			if (smallerIndex >= 0) {
-				ans += smallerIndex - start2 + 1;
-			}
-		}
-
-		return ans;
-	}
-
-	int findIndexOfSmaller(int[] arr, int value, int _startIndex, int _endIndex) {
-		var startIndex = _startIndex;
-		var endIndex = _endIndex;
-		var midIndex = 0;
-
-		while (startIndex < endIndex) {
-			midIndex = (startIndex + endIndex) >> 1;
-
-			if (value <= arr[midIndex]) {
-				endIndex = midIndex;
-			}
-			else {
-				startIndex = midIndex + 1;
-			}
-		}
-
-		if (startIndex != endIndex) {
-			Console.WriteLine("---> Oops");
-		}
-
-		midIndex = (startIndex + endIndex) >> 1;
-
-		if (midIndex + 1 <= _endIndex && value > arr[midIndex + 1]) {
-			return midIndex + 1;
-		}
-		if (value > arr[midIndex]) {
-			return midIndex;
-		}
-		if (midIndex - 1 >= _startIndex && value > arr[midIndex - 1]) {
-			return midIndex - 1;
-		}
-
-		return -1;
 	}
 }

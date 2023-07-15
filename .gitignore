@@ -7,4 +7,5 @@
 /bin
 /local
 *.exe
-/data
+in.txt
+out.txt
