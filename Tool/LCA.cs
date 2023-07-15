@@ -13,8 +13,8 @@ public class LCA {
 		public bool visited;
 	}
 
-	/// @param a index of node A
-	/// @param b index of node B
+	/// @param a: Index of node A
+	/// @param b: Index of node B
 	public void Run(Node[] G, int a, int b) {
 		// Build parent via dfs
 		Dfs(G, a);

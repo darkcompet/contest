@@ -5,14 +5,16 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 
-/// For all 2 indices i < j such that a[i] > a[j], it counts all such pairs.
-/// Approach: divide and conquer.
-/// Time complexity: N * log(N)
 public class Inversion {
 	int CountInversions(int[] arr) {
 		return CountInversions(arr, 0, arr.Length - 1);
 	}
 
+	/// Count all pairs such that: at 2 indices i < j we have a[i] > a[j].
+	/// Approach: divide and conquer.
+	/// Time complexity: N * log(N)
+	/// @param startIndex: Inclusive
+	/// @param endIndex: Inclusive
 	int CountInversions(int[] arr, int startIndex, int endIndex) {
 		if (startIndex >= endIndex) {
 			return 0;
@@ -23,24 +25,25 @@ public class Inversion {
 		var leftResult = CountInversions(arr, startIndex, midIndex);
 		var rightResult = CountInversions(arr, midIndex + 1, endIndex);
 
-		return leftResult + rightResult + binaryResult(arr, startIndex, midIndex, midIndex + 1, endIndex);
+		return leftResult + rightResult + _Conquer(arr, startIndex, midIndex, midIndex + 1, endIndex);
 	}
 
-	private int binaryResult(int[] arr, int start1, int end1, int start2, int end2) {
+	private int _Conquer(int[] arr, int start1, int end1, int start2, int end2) {
+		// Sort on independent subarray after divided
 		Array.Sort(arr, start2, end2 - start2 + 1);
 
-		var ans = 0;
+		var smallerCount = 0;
 		for (var index = start1; index <= end1; ++index) {
-			var smallerIndex = findIndexOfSmaller(arr, arr[index], start2, end2);
-			if (smallerIndex >= 0) {
-				ans += smallerIndex - start2 + 1;
+			var smallerIndex = _FindIndexOfSmaller(arr, arr[index], start2, end2);
+			if (smallerIndex >= start2) {
+				smallerCount += smallerIndex - start2 + 1;
 			}
 		}
 
-		return ans;
+		return smallerCount;
 	}
 
-	int findIndexOfSmaller(int[] arr, int value, int _startIndex, int _endIndex) {
+	private int _FindIndexOfSmaller(int[] arr, int value, int _startIndex, int _endIndex) {
 		var startIndex = _startIndex;
 		var endIndex = _endIndex;
 		var midIndex = 0;

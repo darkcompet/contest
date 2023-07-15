@@ -1,3 +1,4 @@
+package Source;
 import java.io.*;
 
 // javac Contest.java; java Contest debug:1 localInput:0 localOutput:0
