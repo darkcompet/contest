@@ -1,0 +1,53 @@
+public class Data {
+	public readonly int totalSum;
+	public int curSum;
+	public bool[] visited;
+	public int ans = int.MinValue;
+
+	public Data(int totalSum, int N) {
+		this.totalSum = totalSum;
+		this.visited = new bool[N];
+	}
+}
+
+int MaximalMultiple(int[] arr) {
+	var totalSum = 0;
+	foreach (var item in arr) {
+		totalSum += item;
+	}
+
+	var data = new Data(totalSum, arr.Length);
+
+	dfs(arr, 0, data, 0);
+
+	return data.ans;
+}
+
+void dfs(int[] arr, int parent, Data data, int depth) {
+	var lastIndex = arr.Length - 1;
+
+	if (depth >= lastIndex) {
+		return;
+	}
+
+	// Visit the node
+	data.visited[parent] = true;
+	data.curSum += arr[parent];
+	++depth;
+
+	for (var child = 0; child <= lastIndex; ++child) {
+		if (!data.visited[child]) {
+			dfs(arr, child, data, depth);
+		}
+	}
+
+	// Calculation at current node
+	var mul = (data.totalSum - data.curSum) * data.curSum;
+	if (data.ans < mul) {
+		data.ans = mul;
+	}
+
+	// Backtracking
+	data.visited[parent] = false;
+	data.curSum -= arr[parent];
+}
