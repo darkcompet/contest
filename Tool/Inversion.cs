@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 public class Inversion {
-	int CountInversions(int[] arr) {
+	public int CountInversions(int[] arr) {
 		return CountInversions(arr, 0, arr.Length - 1);
 	}
 
@@ -15,7 +15,7 @@ public class Inversion {
 	/// Time complexity: N * log(N)
 	/// @param startIndex: Inclusive
 	/// @param endIndex: Inclusive
-	int CountInversions(int[] arr, int startIndex, int endIndex) {
+	public int CountInversions(int[] arr, int startIndex, int endIndex) {
 		if (startIndex >= endIndex) {
 			return 0;
 		}
