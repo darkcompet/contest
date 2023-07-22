@@ -7,7 +7,7 @@ using System.Linq;
 
 /// LCA (Least Common Ancestor)
 /// It finds height-lowest common ancestor (parent) of 2 nodes in a tree.
-public class LCA {
+public class DkLCA {
 	public class Node {
 		public List<int> children = new List<int>();
 		public bool visited;

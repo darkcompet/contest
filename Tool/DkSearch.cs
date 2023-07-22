@@ -1,5 +1,5 @@
 
-public class Search {
+public class DkSearch {
 	/// Find lower bound index such that: value >= target.
 	/// Time: O(log(N))
 	/// @param arr: Must be sort in asc.

@@ -1,5 +1,5 @@
 
-public class Sequence {
+public class DkSequence {
 	/// Time: O(N)
 	public string LongestSubstring_UniqueChars(string s) {
 		var N = s.Length;

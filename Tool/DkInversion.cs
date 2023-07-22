@@ -5,7 +5,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 
-public class Inversion {
+public class DkInversion {
 	public int CountInversions(int[] arr) {
 		return CountInversions(arr, 0, arr.Length - 1);
 	}
