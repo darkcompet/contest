@@ -25,9 +25,6 @@ public class DkMaths {
 	/// <param name="n">Must be >= 1</param>
 	/// <returns></returns>
 	public static int FloorLog2(long n) {
-		// if (n <= 0) {
-		// 	throw new Exception("N must be > 0");
-		// }
 		var k = 0;
 		while ((1L << k) <= n) {
 			++k;
@@ -43,9 +40,6 @@ public class DkMaths {
 	/// <param name="n">Should be >= 0</param>
 	/// <returns></returns>
 	public static int CeilLog2(long n) {
-		// if (n < 0) {
-		// 	throw new Exception("N must be >= 0");
-		// }
 		var k = 0;
 		while ((1L << k) < n) {
 			++k;
@@ -58,9 +52,9 @@ public class DkMaths {
 	/// For positive integer N, this checks given N is power of 2 or not.
 	/// Time: O(1).
 	/// </summary>
-	/// <param name="N">Any</param>
+	/// <param name="n">Any</param>
 	/// <returns></returns>
-	public static bool IsPowOf2(long N) {
-		return N > 0 && (N & (N - 1)) == 0;
+	public static bool IsPowOf2(long n) {
+		return n > 0 && (n & (n - 1)) == 0;
 	}
 }
