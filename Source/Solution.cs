@@ -1,5 +1,5 @@
-using System.Runtime.CompilerServices;
-using System.Text;
+#pragma warning disable IDE1006 // 命名スタイル
+#pragma warning disable IDE0078 // パターン マッチングを使用します
 
 /// This performs read/write on ASCII chars which be in range [0, 255].
 /// See: https://www.asciitable.com/
@@ -208,7 +208,7 @@ public abstract class SolutionWithFastIO {
 		return isNegative ? -(pre + suf) : (pre + suf);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public char nc() {
 		return (char)this._ReadNextByteSkipWhitespace();
 	}
@@ -216,7 +216,7 @@ public abstract class SolutionWithFastIO {
 	public string ns() {
 		var nextByte = this._ReadNextByteSkipWhitespace();
 
-		var sb = new StringBuilder();
+		var sb = new System.Text.StringBuilder();
 		while (true) {
 			_ = sb.Append((char)nextByte);
 
@@ -324,12 +324,12 @@ public abstract class SolutionWithFastIO {
 		return res;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void print(char ch) {
 		this.print((byte)ch);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void print(byte ch) {
 		if (this.nextWriteByteIndex >= OUT_BUFFER_SIZE) {
 			this.FlushOutBuffer();
@@ -337,7 +337,7 @@ public abstract class SolutionWithFastIO {
 		this.outChars[this.nextWriteByteIndex++] = ch;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void print(byte[] arr, int fromIndex, int count) {
 		if (this.nextWriteByteIndex + count >= OUT_BUFFER_SIZE) {
 			this.FlushOutBuffer();
@@ -382,43 +382,43 @@ public abstract class SolutionWithFastIO {
 		this.print(tmpArr, curIndex, tmpArr.Length - curIndex);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void print(string text) {
-		var arr = Encoding.ASCII.GetBytes(text);
+		var arr = System.Text.Encoding.ASCII.GetBytes(text);
 		this.print(arr, 0, arr.Length);
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void println() {
 		this.print((byte)'\n');
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void println(int num) {
 		this.print(num);
 		this.print((byte)'\n');
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void println(long num) {
 		this.print(num);
 		this.print((byte)'\n');
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void println(string text) {
 		this.print(text);
 		this.print((byte)'\n');
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	protected void FlushOutBuffer() {
 		this.outStream.Write(this.outChars, 0, this.nextWriteByteIndex);
 		this.outStream.Flush();
 		this.nextWriteByteIndex = 0;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	private bool _TryReadNextByte(out byte result) {
 		if (this.nextReadByteIndex >= this.readByteCount) {
 			this.readByteCount = this.inStream.Read(this.inBuffer, 0, IN_BUFFER_SIZE);
@@ -433,7 +433,7 @@ public abstract class SolutionWithFastIO {
 		return true;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	private byte _ReadNextByteSkipWhitespace() {
 		while (this._TryReadNextByte(out var nextByte)) {
 			if (nextByte > WHITE_SPACE_CODE) {
@@ -443,7 +443,7 @@ public abstract class SolutionWithFastIO {
 		throw new Exception("Cannot read more");
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	private void _UnreadNextByte() {
 		if (this.nextReadByteIndex-- <= 0) {
 			throw new Exception("Cannot unread more");
@@ -456,17 +456,95 @@ public abstract class SolutionWithFastIO {
 	}
 }
 
-/// Run by one of below:
 /// dotnet run
-/// mcs ./Source/Contest.cs && mono ./Source/Contest.exe < ./Source/in.txt
+/// mcs ./Source/Solution.cs && mono ./Source/Solution.exe < ./Source/in.txt
 public class Solution : SolutionWithFastIO {
 	// protected override bool inputFromFile => true;
 	// protected override bool outputToFile => true;
 
-	public static void Main(string[] args) {
-		// new Solution().Start();
-	}
+	// // public static void Main(string[] args) {
+	// // 	new Solution().Start();
+	// // }
 
 	protected override void Solve() {
+	}
+
+	public int[] LexicographicallySmallestArray(int[] nums, int limit) {
+		// foreach (var item in nums) {
+		// 	Console.Write(item + " ");
+		// }
+		// Console.WriteLine();
+
+		var N = nums.Length;
+
+		var nodes = new List<Node>(N);
+		for (var index = 0; index < N; ++index) {
+			nodes.Add(new Node() {
+				value = nums[index],
+				originIndex = index
+			});
+		}
+		nodes.Sort((a, b) => { return a.value - b.value; });
+
+		for (var index = 0; index < N; ++index) {
+			var target = nums[index] - limit;
+			var swapNode = FindLeftNode(nodes, index, target);
+			if (swapNode is null) {
+				continue;
+			}
+			nodes.Remove(swapNode);
+		}
+
+		// foreach (var item in nums) {
+		// 	Console.Write(item + " ");
+		// }
+		// Console.WriteLine();
+
+		return nums;
+	}
+
+	private Node? FindLeftNode(List<Node> nodes, int index, int target) {
+		var targetIndex = FindLeftmostIndex(nodes, target, 0, nodes.Count - 1);
+		if (targetIndex < 0 || nodes[index].value < nodes[targetIndex].value) {
+			return null;
+		}
+		return nodes[targetIndex];
+	}
+
+	public int FindLeftmostIndex(List<Node> nodes, int target, int _startIndex, int _endIndex) {
+		var startIndex = _startIndex;
+		var endIndex = _endIndex;
+		var midIndex = 0;
+
+		while (startIndex < endIndex) {
+			midIndex = (startIndex + endIndex) >> 1;
+			if (target <= nodes[midIndex].value) { // Equals means Leftmost
+				endIndex = midIndex;
+			}
+			else {
+				startIndex = midIndex + 1;
+			}
+		}
+
+		// Assert: startIndex == endIndex
+		midIndex = startIndex;
+
+		if (midIndex - 1 >= _startIndex && nodes[midIndex - 1].value >= target) {
+			return midIndex - 1;
+		}
+		if (nodes[midIndex].value >= target) {
+			return midIndex;
+		}
+		if (midIndex + 1 <= _endIndex && nodes[midIndex + 1].value >= target) {
+			return midIndex + 1;
+		}
+
+		return -1;
+	}
+
+	public class Node {
+		public int value;
+		public int originIndex;
+		public bool used;
 	}
 }
