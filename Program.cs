@@ -1,2 +1,2 @@
 ﻿
-Contest.Main(args);
+Solution.Main(args);

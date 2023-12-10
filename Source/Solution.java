@@ -2,7 +2,7 @@ package Source;
 import java.io.*;
 
 // javac Contest.java; java Contest debug:1 localInput:0 localOutput:0
-public class Contest {
+public class Solution {
 	private InputStream in = System.in;
 	private OutputStream out = System.out;
 	private PrintStream err = System.err;
@@ -377,7 +377,7 @@ public class Contest {
 
 	public static void main(String[] args) {
 		try {
-			new Contest().startWithAsciiIO(args);
+			new Solution().startWithAsciiIO(args);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

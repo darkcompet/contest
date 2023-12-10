@@ -1,13 +1,8 @@
 using System.Runtime.CompilerServices;
-using System;
-using System.IO;
 using System.Text;
-using System.Collections.Generic;
-using System.Linq;
 
 /// This performs read/write on ASCII chars which be in range [0, 255].
 /// See: https://www.asciitable.com/
-
 /// TechNotes:
 /// - In dotnet, can use hyphen (_) to separate/group long number. But it does not work in mono.
 public abstract class SolutionWithFastIO {
@@ -23,17 +18,21 @@ public abstract class SolutionWithFastIO {
 	private Stream inStream;
 	private Stream outStream;
 
-	private readonly byte[] inBuffer;
+	private byte[] inBuffer;
 	private int nextReadByteIndex;
 	private int readByteCount;
 
-	private readonly byte[] outChars;
+	private byte[] outChars;
 	private int nextWriteByteIndex;
 
-	/// To store bytes for int, long when write
+	/// To store bytes of int, long values when write to out-buffer
 	private readonly byte[] scratchBytes = new byte[32];
 
 	public SolutionWithFastIO() {
+	}
+
+	protected void Start() {
+		// Init IO
 		this.inStream = this.inputFromFile ?
 			new FileStream(Path.GetFullPath("Data/in.txt"), FileMode.Open, FileAccess.Read, FileShare.ReadWrite) :
 			Console.OpenStandardInput();
@@ -44,9 +43,7 @@ public abstract class SolutionWithFastIO {
 
 		this.inBuffer = new byte[IN_BUFFER_SIZE];
 		this.outChars = new byte[OUT_BUFFER_SIZE];
-	}
 
-	protected void Start() {
 		this.Solve();
 
 		// Flush out buffer
@@ -63,9 +60,9 @@ public abstract class SolutionWithFastIO {
 		var nextChar = this._ReadNextByteSkipWhitespace();
 
 		// Check negative value
-		var isNegative = (nextChar == '-');
+		var isNegative = nextChar == '-';
 		if (isNegative) {
-			_TryReadNextByte(out nextChar);
+			_ = this._TryReadNextByte(out nextChar);
 		}
 
 		// Assert digit
@@ -75,12 +72,12 @@ public abstract class SolutionWithFastIO {
 
 		while (true) {
 			num = (num << 1) + (num << 3) + nextChar - '0';
-			if (!_TryReadNextByte(out nextChar)) {
+			if (!this._TryReadNextByte(out nextChar)) {
 				break;
 			}
 			// Unread if we have read non-digit char
 			if (nextChar < '0' || nextChar > '9') {
-				_UnreadNextByte();
+				this._UnreadNextByte();
 				break;
 			}
 		}
@@ -94,9 +91,9 @@ public abstract class SolutionWithFastIO {
 		var nextChar = this._ReadNextByteSkipWhitespace();
 
 		// Check negative value
-		var isNegative = (nextChar == '-');
+		var isNegative = nextChar == '-';
 		if (isNegative) {
-			_TryReadNextByte(out nextChar);
+			_ = this._TryReadNextByte(out nextChar);
 		}
 
 		// Assert digit
@@ -106,12 +103,12 @@ public abstract class SolutionWithFastIO {
 
 		while (true) {
 			num = (num << 1) + (num << 3) + nextChar - '0';
-			if (!_TryReadNextByte(out nextChar)) {
+			if (!this._TryReadNextByte(out nextChar)) {
 				break;
 			}
 			// Unread if we have read non-digit char
 			if (nextChar < '0' || nextChar > '9') {
-				_UnreadNextByte();
+				this._UnreadNextByte();
 				break;
 			}
 		}
@@ -126,9 +123,9 @@ public abstract class SolutionWithFastIO {
 		var nextChar = this._ReadNextByteSkipWhitespace();
 
 		// Check negative value
-		bool isNegative = (nextChar == '-');
+		var isNegative = nextChar == '-';
 		if (isNegative) {
-			_TryReadNextByte(out nextChar);
+			_ = this._TryReadNextByte(out nextChar);
 		}
 
 		// Assert digit
@@ -138,8 +135,8 @@ public abstract class SolutionWithFastIO {
 
 		var endOfStream = false;
 		while (true) {
-			pre = 10 * pre + (nextChar - '0');
-			if (!_TryReadNextByte(out nextChar)) {
+			pre = (10 * pre) + (nextChar - '0');
+			if (!this._TryReadNextByte(out nextChar)) {
 				endOfStream = true;
 				break;
 			}
@@ -150,7 +147,7 @@ public abstract class SolutionWithFastIO {
 
 		if (nextChar == '.') {
 			var div = 1.0f;
-			while (_TryReadNextByte(out nextChar)) {
+			while (this._TryReadNextByte(out nextChar)) {
 				if (nextChar < '0' || nextChar > '9') {
 					break;
 				}
@@ -159,7 +156,7 @@ public abstract class SolutionWithFastIO {
 		}
 		// Unread if we have read some `non-digit` char, and not `dot` char.
 		else if (!endOfStream) {
-			_UnreadNextByte();
+			this._UnreadNextByte();
 		}
 
 		return isNegative ? -(pre + suf) : (pre + suf);
@@ -172,9 +169,9 @@ public abstract class SolutionWithFastIO {
 		var nextChar = this._ReadNextByteSkipWhitespace();
 
 		// Check negative value
-		bool isNegative = (nextChar == '-');
+		var isNegative = nextChar == '-';
 		if (isNegative) {
-			_TryReadNextByte(out nextChar);
+			_ = this._TryReadNextByte(out nextChar);
 		}
 
 		// Assert digit
@@ -184,8 +181,8 @@ public abstract class SolutionWithFastIO {
 
 		var endOfStream = false;
 		while (true) {
-			pre = 10 * pre + (nextChar - '0');
-			if (!_TryReadNextByte(out nextChar)) {
+			pre = (10 * pre) + (nextChar - '0');
+			if (!this._TryReadNextByte(out nextChar)) {
 				endOfStream = true;
 				break;
 			}
@@ -196,7 +193,7 @@ public abstract class SolutionWithFastIO {
 
 		if (nextChar == '.') {
 			var div = 1.0;
-			while (_TryReadNextByte(out nextChar)) {
+			while (this._TryReadNextByte(out nextChar)) {
 				if (nextChar < '0' || nextChar > '9') {
 					break;
 				}
@@ -205,7 +202,7 @@ public abstract class SolutionWithFastIO {
 		}
 		// Unread if we have read some `non-digit` char, and not `dot` char.
 		else if (!endOfStream) {
-			_UnreadNextByte();
+			this._UnreadNextByte();
 		}
 
 		return isNegative ? -(pre + suf) : (pre + suf);
@@ -221,9 +218,9 @@ public abstract class SolutionWithFastIO {
 
 		var sb = new StringBuilder();
 		while (true) {
-			sb.Append((char)nextByte);
+			_ = sb.Append((char)nextByte);
 
-			if (!_TryReadNextByte(out nextByte) || nextByte <= WHITE_SPACE_CODE) {
+			if (!this._TryReadNextByte(out nextByte) || nextByte <= WHITE_SPACE_CODE) {
 				break;
 			}
 		}
@@ -234,7 +231,7 @@ public abstract class SolutionWithFastIO {
 	public int[] ni(int count) {
 		var res = new int[count];
 		for (var index = 0; index < count; ++index) {
-			res[index] = ni();
+			res[index] = this.ni();
 		}
 		return res;
 	}
@@ -242,7 +239,7 @@ public abstract class SolutionWithFastIO {
 	public long[] nl(int count) {
 		var res = new long[count];
 		for (var index = 0; index < count; ++index) {
-			res[index] = nl();
+			res[index] = this.nl();
 		}
 		return res;
 	}
@@ -250,7 +247,7 @@ public abstract class SolutionWithFastIO {
 	public float[] nf(int count) {
 		var res = new float[count];
 		for (var index = 0; index < count; ++index) {
-			res[index] = nf();
+			res[index] = this.nf();
 		}
 		return res;
 	}
@@ -258,7 +255,7 @@ public abstract class SolutionWithFastIO {
 	public double[] nd(int count) {
 		var res = new double[count];
 		for (var index = 0; index < count; ++index) {
-			res[index] = nd();
+			res[index] = this.nd();
 		}
 		return res;
 	}
@@ -266,7 +263,7 @@ public abstract class SolutionWithFastIO {
 	public char[] nc(int count) {
 		var res = new char[count];
 		for (var index = 0; index < count; ++index) {
-			res[index] = nc();
+			res[index] = this.nc();
 		}
 		return res;
 	}
@@ -274,7 +271,7 @@ public abstract class SolutionWithFastIO {
 	public string[] ns(int count) {
 		var res = new string[count];
 		for (var index = 0; index < count; ++index) {
-			res[index] = ns();
+			res[index] = this.ns();
 		}
 		return res;
 	}
@@ -282,7 +279,7 @@ public abstract class SolutionWithFastIO {
 	public int[][] ni(int rowCount, int colCount) {
 		var res = new int[rowCount][];
 		for (var index = 0; index < rowCount; ++index) {
-			res[index] = ni(colCount);
+			res[index] = this.ni(colCount);
 		}
 		return res;
 	}
@@ -290,7 +287,7 @@ public abstract class SolutionWithFastIO {
 	public long[][] nl(int rowCount, int colCount) {
 		var res = new long[rowCount][];
 		for (var index = 0; index < rowCount; ++index) {
-			res[index] = nl(colCount);
+			res[index] = this.nl(colCount);
 		}
 		return res;
 	}
@@ -298,7 +295,7 @@ public abstract class SolutionWithFastIO {
 	public float[][] nf(int rowCount, int colCount) {
 		var res = new float[rowCount][];
 		for (var index = 0; index < rowCount; ++index) {
-			res[index] = nf(colCount);
+			res[index] = this.nf(colCount);
 		}
 		return res;
 	}
@@ -306,7 +303,7 @@ public abstract class SolutionWithFastIO {
 	public double[][] nd(int rowCount, int colCount) {
 		var res = new double[rowCount][];
 		for (var index = 0; index < rowCount; ++index) {
-			res[index] = nd(colCount);
+			res[index] = this.nd(colCount);
 		}
 		return res;
 	}
@@ -314,7 +311,7 @@ public abstract class SolutionWithFastIO {
 	public char[][] nc(int rowCount, int colCount) {
 		var res = new char[rowCount][];
 		for (var index = 0; index < rowCount; ++index) {
-			res[index] = nc(colCount);
+			res[index] = this.nc(colCount);
 		}
 		return res;
 	}
@@ -322,7 +319,7 @@ public abstract class SolutionWithFastIO {
 	public string[][] ns(int rowCount, int colCount) {
 		var res = new string[rowCount][];
 		for (var index = 0; index < rowCount; ++index) {
-			res[index] = ns(colCount);
+			res[index] = this.ns(colCount);
 		}
 		return res;
 	}
@@ -335,7 +332,7 @@ public abstract class SolutionWithFastIO {
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void print(byte ch) {
 		if (this.nextWriteByteIndex >= OUT_BUFFER_SIZE) {
-			FlushOutBuffer();
+			this.FlushOutBuffer();
 		}
 		this.outChars[this.nextWriteByteIndex++] = ch;
 	}
@@ -343,7 +340,7 @@ public abstract class SolutionWithFastIO {
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void print(byte[] arr, int fromIndex, int count) {
 		if (this.nextWriteByteIndex + count >= OUT_BUFFER_SIZE) {
-			FlushOutBuffer();
+			this.FlushOutBuffer();
 		}
 		Array.Copy(arr, fromIndex, this.outChars, this.nextWriteByteIndex, count);
 		this.nextWriteByteIndex += count;
@@ -398,14 +395,14 @@ public abstract class SolutionWithFastIO {
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void println(int num) {
-		print(num);
-		print(((byte)'\n'));
+		this.print(num);
+		this.print((byte)'\n');
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void println(long num) {
-		print(num);
-		print(((byte)'\n'));
+		this.print(num);
+		this.print((byte)'\n');
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -438,8 +435,7 @@ public abstract class SolutionWithFastIO {
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private byte _ReadNextByteSkipWhitespace() {
-		byte nextByte;
-		while (_TryReadNextByte(out nextByte)) {
+		while (this._TryReadNextByte(out var nextByte)) {
 			if (nextByte > WHITE_SPACE_CODE) {
 				return nextByte;
 			}
@@ -460,17 +456,17 @@ public abstract class SolutionWithFastIO {
 	}
 }
 
+/// Run by one of below:
+/// dotnet run
 /// mcs ./Source/Contest.cs && mono ./Source/Contest.exe < ./Source/in.txt
-public class Contest : SolutionWithFastIO {
+public class Solution : SolutionWithFastIO {
 	// protected override bool inputFromFile => true;
 	// protected override bool outputToFile => true;
 
 	public static void Main(string[] args) {
-		new Contest().Start();
+		// new Solution().Start();
 	}
 
-	/// C++: https://atcoder.jp/contests/abc310/submissions/43606683
-	/// C#: https://atcoder.jp/contests/abc310/submissions/43585432
 	protected override void Solve() {
 	}
 }
