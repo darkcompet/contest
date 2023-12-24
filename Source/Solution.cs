@@ -1,14 +1,20 @@
 #pragma warning disable IDE1006 // 命名スタイル
 #pragma warning disable IDE0078 // パターン マッチングを使用します
 
-/// This performs read/write on ASCII chars which be in range [0, 255].
-/// See: https://www.asciitable.com/
+/// <summary>
+/// This performs read/write on ASCII chars which be in range [0, 255] (see: https://www.asciitable.com/).
 /// TechNotes:
-/// - In dotnet, can use hyphen (_) to separate/group long number. But it does not work in mono.
+/// - Use hyphen (_) to separate/group long number (but it does not work in mono).
+/// - Use new keyword to override base method that does not declare with virtual keyword.
+/// </summary>
 public abstract class SolutionWithFastIO {
 	protected virtual bool inputFromFile { get; set; }
 	protected virtual bool outputToFile { get; set; }
-	protected abstract void Solve();
+
+	/// <summary>
+	/// Subclass can override this method to give the solution.
+	/// </summary>
+	protected virtual void Solve() { }
 
 	/// White space chars: space, tab, linefeed
 	private const int WHITE_SPACE_CODE = 32;
@@ -347,12 +353,12 @@ public abstract class SolutionWithFastIO {
 	}
 
 	public void print(int num) {
-		var tmpArr = this.scratchBytes;
-		var curIndex = tmpArr.Length;
+		var buffer = this.scratchBytes;
+		var curIndex = buffer.Length;
 		var isNegative = num < 0;
 
 		do {
-			tmpArr[--curIndex] = (byte)((isNegative ? -(num % 10) : (num % 10)) + '0');
+			buffer[--curIndex] = (byte)((isNegative ? -(num % 10) : (num % 10)) + '0');
 			num /= 10;
 		}
 		while (num != 0);
@@ -361,16 +367,16 @@ public abstract class SolutionWithFastIO {
 		if (isNegative) {
 			this.print((byte)'-');
 		}
-		this.print(tmpArr, curIndex, tmpArr.Length - curIndex);
+		this.print(buffer, curIndex, buffer.Length - curIndex);
 	}
 
 	public void print(long num) {
-		var tmpArr = this.scratchBytes;
-		var curIndex = tmpArr.Length;
+		var buffer = this.scratchBytes;
+		var curIndex = buffer.Length;
 		var isNegative = num < 0;
 
 		do {
-			tmpArr[--curIndex] = (byte)((isNegative ? -(num % 10) : (num % 10)) + '0');
+			buffer[--curIndex] = (byte)((isNegative ? -(num % 10) : (num % 10)) + '0');
 			num /= 10;
 		}
 		while (num != 0);
@@ -379,7 +385,7 @@ public abstract class SolutionWithFastIO {
 		if (isNegative) {
 			this.print((byte)'-');
 		}
-		this.print(tmpArr, curIndex, tmpArr.Length - curIndex);
+		this.print(buffer, curIndex, buffer.Length - curIndex);
 	}
 
 	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -450,101 +456,31 @@ public abstract class SolutionWithFastIO {
 		}
 	}
 
+	/// <summary>
 	/// Utc epoch time in millis.
+	/// </summary>
+	/// <returns>Elapsed UTC-time from Epoch in milliseconds</returns>
 	protected static long Now() {
 		return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 	}
+
+	protected void debug(string text) {
+		Console.Write(text);
+	}
+	protected void debugln(string text) {
+		Console.WriteLine(text);
+	}
 }
 
-/// dotnet run
-/// mcs ./Source/Solution.cs && mono ./Source/Solution.exe < ./Source/in.txt
+/// How to run: dotnet run
 public class Solution : SolutionWithFastIO {
 	// protected override bool inputFromFile => true;
 	// protected override bool outputToFile => true;
 
-	// // public static void Main(string[] args) {
-	// // 	new Solution().Start();
-	// // }
+	// public static void Main(string[] args) {
+	// 	new Solution().Start();
+	// }
 
-	protected override void Solve() {
-	}
-
-	public int[] LexicographicallySmallestArray(int[] nums, int limit) {
-		// foreach (var item in nums) {
-		// 	Console.Write(item + " ");
-		// }
-		// Console.WriteLine();
-
-		var N = nums.Length;
-
-		var nodes = new List<Node>(N);
-		for (var index = 0; index < N; ++index) {
-			nodes.Add(new Node() {
-				value = nums[index],
-				originIndex = index
-			});
-		}
-		nodes.Sort((a, b) => { return a.value - b.value; });
-
-		for (var index = 0; index < N; ++index) {
-			var target = nums[index] - limit;
-			var swapNode = FindLeftNode(nodes, index, target);
-			if (swapNode is null) {
-				continue;
-			}
-			nodes.Remove(swapNode);
-		}
-
-		// foreach (var item in nums) {
-		// 	Console.Write(item + " ");
-		// }
-		// Console.WriteLine();
-
-		return nums;
-	}
-
-	private Node? FindLeftNode(List<Node> nodes, int index, int target) {
-		var targetIndex = FindLeftmostIndex(nodes, target, 0, nodes.Count - 1);
-		if (targetIndex < 0 || nodes[index].value < nodes[targetIndex].value) {
-			return null;
-		}
-		return nodes[targetIndex];
-	}
-
-	public int FindLeftmostIndex(List<Node> nodes, int target, int _startIndex, int _endIndex) {
-		var startIndex = _startIndex;
-		var endIndex = _endIndex;
-		var midIndex = 0;
-
-		while (startIndex < endIndex) {
-			midIndex = (startIndex + endIndex) >> 1;
-			if (target <= nodes[midIndex].value) { // Equals means Leftmost
-				endIndex = midIndex;
-			}
-			else {
-				startIndex = midIndex + 1;
-			}
-		}
-
-		// Assert: startIndex == endIndex
-		midIndex = startIndex;
-
-		if (midIndex - 1 >= _startIndex && nodes[midIndex - 1].value >= target) {
-			return midIndex - 1;
-		}
-		if (nodes[midIndex].value >= target) {
-			return midIndex;
-		}
-		if (midIndex + 1 <= _endIndex && nodes[midIndex + 1].value >= target) {
-			return midIndex + 1;
-		}
-
-		return -1;
-	}
-
-	public class Node {
-		public int value;
-		public int originIndex;
-		public bool used;
-	}
+	// protected override void Solve() {
+	// }
 }
