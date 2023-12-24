@@ -483,4 +483,24 @@ public class Solution : SolutionWithFastIO {
 
 	// protected override void Solve() {
 	// }
+
+	public IList<IList<int>> ThreeSum(int[] nums) {
+		var ans = new List<IList<int>>();
+		var set = new HashSet<string>();
+		var N = nums.Length;
+		Array.Sort(nums);
+		for (var x = 0; x < N; ++x) {
+			for (var y = x + 1; y < N; ++y) {
+				var targetIndex = Array.BinarySearch(nums, y + 1, N - y - 1, -nums[x] - nums[y]);
+				if (targetIndex >= 0) {
+					set.Add($"{nums[x]}:{nums[y]}:{nums[targetIndex]}");
+				}
+			}
+		}
+		foreach (var item in set) {
+			var arr = item.Split(':');
+			ans.Add(new List<int>() { int.Parse(arr[0]), int.Parse(arr[1]), int.Parse(arr[2]) });
+		}
+		return ans;
+	}
 }
