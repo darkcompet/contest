@@ -9,7 +9,13 @@ This project is written mainly in C# and should be run with Mono.
 - Run
 
 	```bash
-	cd Source; mcs Contest.cs; mono Contest.exe;
+	# Git pull submodules
+	git pull
+	git submodule init
+	git submodule update --remote --merge
+
+	# Start program
+	dotnet run
 	```
 
 
