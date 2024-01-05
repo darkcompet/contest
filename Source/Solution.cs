@@ -493,30 +493,24 @@ public class Solution : BaseSolution {
 		var N = nums.Length;
 
 		var num2node = new AATree<int, MyNode>();
-		var index2node = new Dictionary<int, MyNode>();
 		for (var index = 0; index < N; ++index) {
 			var node = new MyNode() {
 				num = nums[index],
 				numIndex = index
 			};
 			num2node.Add(nums[index], node);
-			index2node[index] = node;
 		}
 
 		for (var index = 0; index < N; ++index) {
-			var curNode = index2node[index];
 			var swapNode = FindSwapNode(num2node, nums[index], limit);
 
 			if (swapNode is null) {
-				num2node.Remove(curNode.num);
+				// num2node.RemoveViaNode(nums[index]);
 				continue;
 			}
 
 			(nums[index], nums[swapNode.numIndex]) = (nums[swapNode.numIndex], nums[index]);
-			index2node[index] = swapNode;
-			index2node[swapNode.numIndex] = curNode;
 
-			curNode.numIndex = swapNode.numIndex;
 			num2node.Remove(swapNode.num);
 		}
 
@@ -542,7 +536,7 @@ public class Solution : BaseSolution {
 	}
 
 	public class AATree<TKey, TValue> where TKey : IComparable<TKey> {
-		private class Node {
+		public class Node {
 			// Node internal data
 			internal int level;
 			internal Node left;
@@ -585,6 +579,7 @@ public class Solution : BaseSolution {
 				node.left = left.right;
 				left.right = node;
 				node = left;
+				this.node2key[node] = node.key;
 			}
 		}
 
@@ -596,12 +591,14 @@ public class Solution : BaseSolution {
 				right.left = node;
 				node = right;
 				node.level++;
+				this.node2key[node] = node.key;
 			}
 		}
 
 		private bool Insert(ref Node node, TKey key, TValue value) {
 			if (node == this.sentinel) {
 				node = new Node(key, value, this.sentinel);
+				this.node2key[node] = key;
 				return true;
 			}
 
@@ -651,7 +648,9 @@ public class Solution : BaseSolution {
 				del.key = node.key;
 				del.value = node.value;
 				this.deleted = null;
+				this.node2key.Remove(node);
 				node = node.right;
+				this.node2key[node] = node.key;
 			}
 			else if (node.left.level < node.level - 1 || node.right.level < node.level - 1) {
 				--node.level;
@@ -675,10 +674,10 @@ public class Solution : BaseSolution {
 
 			var compare = key.CompareTo(node.key);
 			if (compare < 0) {
-				return Search(node.left, key);
+				return this.Search(node.left, key);
 			}
 			else if (compare > 0) {
-				return Search(node.right, key);
+				return this.Search(node.right, key);
 			}
 			else {
 				return node;
@@ -693,13 +692,22 @@ public class Solution : BaseSolution {
 			return this.Delete(ref this.root, key);
 		}
 
+		private Dictionary<Node, TKey> node2key = new();
+		public bool RemoveViaNode(Node node) {
+			var key = node2key.GetValueOrDefault(node);
+			if (key is null) {
+				return false;
+			}
+			return this.Delete(ref this.root, key);
+		}
+
 		public TValue this[TKey key] {
 			get {
 				var node = this.Search(this.root, key);
 				return node is null ? default : node.value;
 			}
 			set {
-				var node = this.Search(root, key);
+				var node = this.Search(this.root, key);
 				if (node == null) {
 					this.Add(key, value);
 				}
@@ -722,14 +730,17 @@ public class Solution : BaseSolution {
 			var compare = key.CompareTo(node.key);
 			if (compare < 0) {
 				if (node.left is null || node.left.key.CompareTo(key) <= 0) {
-					return node.left;
+					return node;
 				}
 				return this.Lowerbound(node.left, key);
 			}
 
 			if (compare > 0) {
-				if (node.right is null || node.right.key.CompareTo(key) >= 0) {
-					return node.right;
+				if (node.right is null) {
+					return null;
+				}
+				if (node.right.key.CompareTo(key) >= 0) {
+					return node;
 				}
 				return this.Lowerbound(node.right, key);
 			}
