@@ -482,307 +482,110 @@ public class Solution : BaseSolution {
 	// protected override bool outputToFile => true;
 
 	// public static void Main(params string[] args) {
-	// 	new Solution().Start();
+	//  new Solution().Start();
 	// }
 
 	// protected override void Solve() {
-	// 	debugln("ans: " + string.Join(", ", LexicographicallySmallestArray(new int[] { 4, 52, 38, 59, 71, 27, 31, 83, 88, 10 }, 14)));
+	//  debugln("ans: " + string.Join(", ", LexicographicallySmallestArray(new int[] { 4, 52, 38, 59, 71, 27, 31, 83, 88, 10 }, 14)));
 	// }
 
-	public int[] LexicographicallySmallestArray(int[] nums, int limit) {
+	public int MissingInteger(int[] nums) {
+		var sum = nums[0];
+		for (var index = 1; index < nums.Length; ++index) {
+			if (nums[index] - nums[index - 1] != 1) {
+				break;
+			}
+			else {
+				sum += nums[index];
+			}
+		}
+		Array.Sort(nums);
+		foreach (var num in nums) {
+			if (num == sum) {
+				++sum;
+			}
+		}
+		return sum;
+	}
+
+	public int MinOperations(int[] nums, int k) {
 		var N = nums.Length;
-
-		var num2node = new AATree<int, MyNode>();
-		for (var index = 0; index < N; ++index) {
-			var node = new MyNode() {
-				num = nums[index],
-				numIndex = index
-			};
-			num2node.Add(nums[index], node);
-		}
-
-		for (var index = 0; index < N; ++index) {
-			var swapNode = FindSwapNode(num2node, nums[index], limit);
-
-			if (swapNode is null) {
-				// num2node.RemoveViaNode(nums[index]);
-				continue;
-			}
-
-			(nums[index], nums[swapNode.numIndex]) = (nums[swapNode.numIndex], nums[index]);
-
-			num2node.Remove(swapNode.num);
-		}
-
-		return nums;
-	}
-
-	private MyNode? FindSwapNode(AATree<int, MyNode> num2node, int num, int limit) {
-		MyNode? result = null;
-		while (true) {
-			// num - target <= limit
-			var node = num2node.Lowerbound(num - limit);
-			if (node is null || node.num >= num) {
-				return result;
-			}
-			result = node;
-			num = result.num;
-		}
-	}
-
-	public class MyNode {
-		public int num;
-		public int numIndex;
-	}
-
-	public class AATree<TKey, TValue> where TKey : IComparable<TKey> {
-		public class Node {
-			// Node internal data
-			internal int level;
-			internal Node left;
-			internal Node right;
-
-			// User data
-			internal TKey key;
-			internal TValue value;
-
-			// Constuctor for the sentinel node
-			internal Node() {
-				this.level = 0;
-				this.left = this;
-				this.right = this;
-			}
-
-			// Constuctor for regular nodes (that all start life as leaf nodes)
-			internal Node(TKey key, TValue value, Node sentinel) {
-				this.level = 1;
-				this.left = sentinel;
-				this.right = sentinel;
-				this.key = key;
-				this.value = value;
-			}
-		}
-
-		Node root;
-		Node sentinel;
-		Node? deleted;
-
-		public AATree() {
-			this.root = this.sentinel = new Node();
-			this.deleted = null;
-		}
-
-		private void Skew(ref Node node) {
-			if (node.level == node.left.level) {
-				// rotate right
-				var left = node.left;
-				node.left = left.right;
-				left.right = node;
-				node = left;
-				this.node2key[node] = node.key;
-			}
-		}
-
-		private void Split(ref Node node) {
-			if (node.right.right.level == node.level) {
-				// rotate left
-				var right = node.right;
-				node.right = right.left;
-				right.left = node;
-				node = right;
-				node.level++;
-				this.node2key[node] = node.key;
-			}
-		}
-
-		private bool Insert(ref Node node, TKey key, TValue value) {
-			if (node == this.sentinel) {
-				node = new Node(key, value, this.sentinel);
-				this.node2key[node] = key;
-				return true;
-			}
-
-			var compare = key.CompareTo(node.key);
-			if (compare < 0) {
-				if (!this.Insert(ref node.left, key, value)) {
-					return false;
+		var ans = 0;
+		for (var bitIndex = 0; bitIndex < 32; ++bitIndex) {
+			var bitCount = 0;
+			for (var index = 0; index < N; ++index) {
+				var bit = (nums[index] >> bitIndex) & 1;
+				if (bit == 1) {
+					++bitCount;
 				}
 			}
-			else if (compare > 0) {
-				if (!this.Insert(ref node.right, key, value)) {
-					return false;
+			var targetBit = (k >> bitIndex) & 1;
+			if (targetBit == 0) {
+				if (bitCount % 2 == 1) {
+					++ans;
 				}
 			}
 			else {
-				return false;
-			}
-
-			this.Skew(ref node);
-			this.Split(ref node);
-
-			return true;
-		}
-
-		private bool Delete(ref Node node, TKey key) {
-			if (node == this.sentinel) {
-				return this.deleted != null;
-			}
-
-			var compare = key.CompareTo(node.key);
-			if (compare < 0) {
-				if (!this.Delete(ref node.left, key)) {
-					return false;
+				if (bitCount % 2 == 0) {
+					++ans;
 				}
 			}
-			else {
-				if (compare == 0) {
-					this.deleted = node;
-				}
-				if (!this.Delete(ref node.right, key)) {
-					return false;
-				}
-			}
-
-			var del = this.deleted;
-			if (del != null) {
-				del.key = node.key;
-				del.value = node.value;
-				this.deleted = null;
-				this.node2key.Remove(node);
-				node = node.right;
-				this.node2key[node] = node.key;
-			}
-			else if (node.left.level < node.level - 1 || node.right.level < node.level - 1) {
-				--node.level;
-				if (node.right.level > node.level) {
-					node.right.level = node.level;
-				}
-				this.Skew(ref node);
-				this.Skew(ref node.right);
-				this.Skew(ref node.right.right);
-				this.Split(ref node);
-				this.Split(ref node.right);
-			}
-
-			return true;
-		}
-
-		private Node? Search(Node node, TKey key) {
-			if (node == this.sentinel) {
-				return null;
-			}
-
-			var compare = key.CompareTo(node.key);
-			if (compare < 0) {
-				return this.Search(node.left, key);
-			}
-			else if (compare > 0) {
-				return this.Search(node.right, key);
-			}
-			else {
-				return node;
-			}
-		}
-
-		public bool Add(TKey key, TValue value) {
-			return this.Insert(ref this.root, key, value);
-		}
-
-		public bool Remove(TKey key) {
-			return this.Delete(ref this.root, key);
-		}
-
-		private Dictionary<Node, TKey> node2key = new();
-		public bool RemoveViaNode(Node node) {
-			var key = node2key.GetValueOrDefault(node);
-			if (key is null) {
-				return false;
-			}
-			return this.Delete(ref this.root, key);
-		}
-
-		public TValue this[TKey key] {
-			get {
-				var node = this.Search(this.root, key);
-				return node is null ? default : node.value;
-			}
-			set {
-				var node = this.Search(this.root, key);
-				if (node == null) {
-					this.Add(key, value);
-				}
-				else {
-					node.value = value;
-				}
-			}
-		}
-
-		public TValue? Lowerbound(TKey key) {
-			var node = this.Lowerbound(this.root, key);
-			return node is null ? default : node.value;
-		}
-
-		private Node? Lowerbound(Node node, TKey key) {
-			if (node == this.sentinel) {
-				return null;
-			}
-
-			var compare = key.CompareTo(node.key);
-			if (compare < 0) {
-				if (node.left is null || node.left.key.CompareTo(key) <= 0) {
-					return node;
-				}
-				return this.Lowerbound(node.left, key);
-			}
-
-			if (compare > 0) {
-				if (node.right is null) {
-					return null;
-				}
-				if (node.right.key.CompareTo(key) >= 0) {
-					return node;
-				}
-				return this.Lowerbound(node.right, key);
-			}
-
-			return node;
-		}
-	}
-
-	public IList<IList<int>> CombinationSum(int[] candidates, int target) {
-		return dp(candidates, target, new List<int>());
-	}
-
-	private List<IList<int>> dp(int[] candidates, int target, List<int> removedIndices) {
-		// 1. Contains candidates[i]
-		// 2. Not contain candidates[i]
-		var ans = new List<IList<int>>();
-		if (candidates.Length - removedIndices.Count == 1) {
-			var remainIndex = -1;
-			for (var index = candidates.Length - 1; index >= 0; --index) {
-				if (removedIndices.Contains(index)) {
-					remainIndex = index;
-					break;
-				}
-			}
-			if (remainIndex >= 0 && candidates[remainIndex] == target) {
-				ans.Add(new List<int> { candidates[remainIndex] });
-			}
-			return ans;
-		}
-
-		for (var index = 0; index < candidates.Length; ++index) {
-			if (removedIndices.Contains(index)) {
-				continue;
-			}
-			var indices1 = new List<int> { index };
-			indices1.AddRange(removedIndices);
-			ans.AddRange(dp(candidates, target, indices1));
-
-			var indices2 = new List<int> { index };
-			indices2.AddRange(removedIndices);
-			ans.AddRange(dp(candidates, target - candidates[index], indices2));
 		}
 		return ans;
 	}
+
+	public int MinimumOperationsToMakeEqual(int x, int y) {
+		// Do ONE of ope:
+		// 1. Divide x by 11 if x is a multiple of 11.
+		// 2. Divide x by 5 if x is a multiple of 5.
+		// 3. Decrement x by 1.
+		// 4. Increment x by 1.
+
+		if (x <= y) {
+			return y - x;
+		}
+
+		// 24, 4
+		// 24, 3
+		// 20, 14
+		// 20, 2
+
+		var res1 = (11 - x % 11) + 1 + MinimumOperationsToMakeEqual((x + (11 - x % 11)) / 11, y);
+		var res2 = (x % 11) + 1 + MinimumOperationsToMakeEqual((x - (x % 11)) / 11, y);
+		var res3 = (5 - x % 5) + 1 + MinimumOperationsToMakeEqual((x + (5 - x % 5)) / 5, y);
+		var res4 = (x % 5) + 1 + MinimumOperationsToMakeEqual((x - (x % 5)) / 5, y);
+		var res5 = x - y;
+
+		return new int[] { res1, res2, res3, res4, res5 }.Min();
+	}
+
+	// public long NumberOfPowerfulInt(long start, long finish, int limit, string s) {
+	// 	var startStr = start.ToString();
+	// 	var finishStr = finish.ToString();
+	// 	var startCount = startStr.Length;
+	// 	var finishCount = finishStr.Length;
+	// 	var sCount = s.Length;
+	// 	var sValue = long.Parse(s);
+	// 	if (finish < sValue) {
+	// 		return 0;
+	// 	}
+	// 	if (finishStr.Length == s.Length) {
+	// 		return finish == sValue ? 1 : 0;
+	// 	}
+
+	// 	var digitLimitCounts = new int[26];
+	// 	Array.Fill(digitLimitCounts, limit);
+
+	// 	var s_freq_char_count = new int[26];
+	// 	for (var index = sCount - 1; index >= 0; --index) {
+	// 		if (++s_freq_char_count[s[index] - 'a'] > limit) {
+	// 			return 0;
+	// 		}
+	// 		--digitLimitCounts[index];
+	// 	}
+
+	// 	// 000 -> 312
+	// 	var range = finishStr[..(finishStr.Length - sCount)];
+	// 	var rangeLen = range.Length;
+	// }
 }
