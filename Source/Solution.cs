@@ -1,5 +1,6 @@
 #pragma warning disable IDE1006 // 命名スタイル
 #pragma warning disable IDE0078 // パターン マッチングを使用します
+#pragma warning disable IDE0058 // 式の値が使用されていません
 
 /// <summary>
 /// This performs read/write on ASCII chars which be in range [0, 255] (see: https://www.asciitable.com/).
@@ -489,103 +490,111 @@ public class Solution : BaseSolution {
 	//  debugln("ans: " + string.Join(", ", LexicographicallySmallestArray(new int[] { 4, 52, 38, 59, 71, 27, 31, 83, 88, 10 }, 14)));
 	// }
 
-	public int MissingInteger(int[] nums) {
-		var sum = nums[0];
-		for (var index = 1; index < nums.Length; ++index) {
-			if (nums[index] - nums[index - 1] != 1) {
+	//
+	public class Node {
+		public int dig;
+		public int area;
+	}
+	public int AreaOfMaxDiagonal(int[][] arr) {
+		var list = new List<Node>();
+		foreach (var item in arr) {
+			var len = item[0];
+			var width = item[1];
+			list.Add(new() { dig = len * len + width * width, area = len * width });
+		}
+		list.Sort((a, b) => {
+			return b.dig - a.dig;
+		});
+		var maxDig = list[0].dig;
+		var maxArea = -1;
+		for (var index = 0; index < list.Count; ++index) {
+			if (maxDig != list[index].dig) {
 				break;
 			}
+			maxArea = Math.Max(maxArea, list[index].area);
+		}
+		return maxArea;
+	}
+
+	//
+	public int MinMovesToCaptureTheQueen(int a, int b, int c, int d, int e, int f) {
+		var rookMove = 2;
+		if (a == e || b == f) {
+			rookMove = 1;
+			if (a == c && d > Math.Min(b, f) && d < Math.Max(b, f)) {
+				++rookMove; // Move bishop
+			}
+			else if (b == d && c > Math.Min(a, e) && c < Math.Max(a, e)) {
+				++rookMove; // Move bishop
+			}
+		}
+
+		var bishopMove = 9999;
+		if (Math.Abs(c - e) == Math.Abs(d - f)) {
+			bishopMove = 1;
+			if (a > Math.Min(c, e) && a < Math.Max(c, e) && b > Math.Min(d, f) && b < Math.Max(d, f)) {
+				if (Math.Abs(a - e) == Math.Abs(b - f)) {
+					++bishopMove;
+				}
+			}
+		}
+
+		return Math.Min(rookMove, bishopMove);
+	}
+
+	//
+	public int MaximumSetSize(int[] nums_a, int[] nums_b) {
+		var N = nums_a.Length; // even
+		var setA = new HashSet<int>();
+		var setB = new HashSet<int>();
+		foreach (var num in nums_a) {
+			setA.Add(num);
+		}
+		foreach (var num in nums_b) {
+			setB.Add(num);
+		}
+
+		var shared = new HashSet<int>();
+		var remainA = new HashSet<int>();
+		foreach (var num in nums_a) {
+			if (setB.Contains(num)) {
+				shared.Add(num);
+			}
 			else {
-				sum += nums[index];
+				remainA.Add(num);
 			}
 		}
-		Array.Sort(nums);
-		foreach (var num in nums) {
-			if (num == sum) {
-				++sum;
-			}
-		}
-		return sum;
-	}
-
-	public int MinOperations(int[] nums, int k) {
-		var N = nums.Length;
-		var ans = 0;
-		for (var bitIndex = 0; bitIndex < 32; ++bitIndex) {
-			var bitCount = 0;
-			for (var index = 0; index < N; ++index) {
-				var bit = (nums[index] >> bitIndex) & 1;
-				if (bit == 1) {
-					++bitCount;
-				}
-			}
-			var targetBit = (k >> bitIndex) & 1;
-			if (targetBit == 0) {
-				if (bitCount % 2 == 1) {
-					++ans;
-				}
+		var remainB = new HashSet<int>();
+		foreach (var num in nums_b) {
+			if (setA.Contains(num)) {
+				shared.Add(num);
 			}
 			else {
-				if (bitCount % 2 == 0) {
-					++ans;
-				}
+				remainB.Add(num);
 			}
 		}
-		return ans;
-	}
 
-	public int MinimumOperationsToMakeEqual(int x, int y) {
-		// Do ONE of ope:
-		// 1. Divide x by 11 if x is a multiple of 11.
-		// 2. Divide x by 5 if x is a multiple of 5.
-		// 3. Decrement x by 1.
-		// 4. Increment x by 1.
+		var count1 = Math.Min(N / 2, remainA.Count);
+		var count2 = Math.Min(N / 2, remainB.Count);
 
-		if (x <= y) {
-			return y - x;
+		var sharedTookByA = 0;
+		if (count1 < N / 2) {
+			sharedTookByA = Math.Min(N / 2 - count1, shared.Count);
+			count1 += sharedTookByA;
+		}
+		var sharedTookByB = shared.Count - sharedTookByA;
+		if (count2 < N / 2) {
+			if (sharedTookByA < shared.Count) {
+				sharedTookByB = Math.Min(N / 2 - count2, Math.Max(0, shared.Count - sharedTookByA));
+				count2 += sharedTookByB;
+			}
 		}
 
-		// 24, 4
-		// 24, 3
-		// 20, 14
-		// 20, 2
-
-		var res1 = (11 - x % 11) + 1 + MinimumOperationsToMakeEqual((x + (11 - x % 11)) / 11, y);
-		var res2 = (x % 11) + 1 + MinimumOperationsToMakeEqual((x - (x % 11)) / 11, y);
-		var res3 = (5 - x % 5) + 1 + MinimumOperationsToMakeEqual((x + (5 - x % 5)) / 5, y);
-		var res4 = (x % 5) + 1 + MinimumOperationsToMakeEqual((x - (x % 5)) / 5, y);
-		var res5 = x - y;
-
-		return new int[] { res1, res2, res3, res4, res5 }.Min();
+		return count1 + count2;
 	}
 
-	// public long NumberOfPowerfulInt(long start, long finish, int limit, string s) {
-	// 	var startStr = start.ToString();
-	// 	var finishStr = finish.ToString();
-	// 	var startCount = startStr.Length;
-	// 	var finishCount = finishStr.Length;
-	// 	var sCount = s.Length;
-	// 	var sValue = long.Parse(s);
-	// 	if (finish < sValue) {
-	// 		return 0;
-	// 	}
-	// 	if (finishStr.Length == s.Length) {
-	// 		return finish == sValue ? 1 : 0;
-	// 	}
-
-	// 	var digitLimitCounts = new int[26];
-	// 	Array.Fill(digitLimitCounts, limit);
-
-	// 	var s_freq_char_count = new int[26];
-	// 	for (var index = sCount - 1; index >= 0; --index) {
-	// 		if (++s_freq_char_count[s[index] - 'a'] > limit) {
-	// 			return 0;
-	// 		}
-	// 		--digitLimitCounts[index];
-	// 	}
-
-	// 	// 000 -> 312
-	// 	var range = finishStr[..(finishStr.Length - sCount)];
-	// 	var rangeLen = range.Length;
+	//
+	// public int MaxPartitionsAfterOperations(string s, int k) {
+	// 	var N = s.Length;
 	// }
 }
