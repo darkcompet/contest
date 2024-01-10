@@ -3,6 +3,270 @@
 #pragma warning disable IDE0058 // 式の値が使用されていません
 
 /// <summary>
+/// Ref:
+/// https://users.cs.fiu.edu/~weiss/dsaa_c++/code/AATree.cpp
+/// https://github.com/JuYanYan/AA-Tree/blob/master/aatree.cpp
+/// </summary>
+/// <typeparam name="T"></typeparam>
+public class AATree<T> where T : IComparable<T> {
+	private AATreeNode? root;
+
+	public AATree() {
+	}
+
+	public void Add(T value) {
+		this.root = this.Insert(this.root, value);
+	}
+
+	private AATreeNode Insert(AATreeNode? node, T value) {
+		if (node is null) {
+			return new AATreeNode(value, null, null);
+		}
+
+		var compare = value.CompareTo(node.value);
+		if (compare == 0) {
+			++node.count;
+			return node;
+		}
+
+		if (compare < 0) {
+			node.left = this.Insert(node.left, value);
+		}
+		else {
+			node.right = this.Insert(node.right, value);
+		}
+
+		node = this.Skew(node);
+		node = this.Split(node);
+
+		return node;
+	}
+
+	public bool Remove(T value) {
+		this.root = this.Delete(this.root, value);
+		return this.root != null;
+	}
+
+	private AATreeNode? Delete(AATreeNode? node, T value) {
+		if (node is null) {
+			return null;
+		}
+
+		var compare = value.CompareTo(node.value);
+		if (compare < 0) {
+			node.left = this.Delete(node.left, value);
+		}
+		else if (compare > 0) {
+			node.right = this.Delete(node.right, value);
+		}
+		else {
+			--node.count;
+			if (node.left is null && node.right is null) {
+				return node.count == 0 ? null : node;
+			}
+
+			if (node.left is null) {
+				var suc = Successor(node);
+				node.value = suc.value; // Exchange position.
+				node.right = this.Delete(node.right, suc.value); // Delete successor node.
+			}
+			else {
+				var pre = Predecessor(node);
+				node.value = pre.value; // Similar to the above.
+				node.left = this.Delete(node.left, pre.value);
+			}
+		}
+
+		node = DecreaseLevel(node);
+		node = this.Skew(node);
+		var right = node.right;
+
+		if (right != null) {
+			node.right = this.Skew(right);
+
+			if (right.right != null) {
+				node.right.right = this.Skew(right.right);
+			}
+		}
+
+		node = this.Split(node);
+		if (right != null) {
+			node.right = this.Split(right);
+		}
+
+		return node;
+	}
+
+	static AATreeNode DecreaseLevel(AATreeNode node) {
+		int wdo;
+		if (node.left != null && node.right != null) {
+			wdo = Math.Min(node.left.level, node.right.level) + 1;
+			if (wdo < node.level) {
+				node.level = wdo;
+				if (node.right != null && wdo < node.right.level) {
+					node.right.level = wdo;
+				}
+			}
+		}
+		return node;
+	}
+
+	static AATreeNode Predecessor(AATreeNode curNode) {
+		curNode = curNode.left!;
+		while (curNode.right != null) {
+			curNode = curNode.right;
+		}
+		return curNode;
+	}
+
+	static AATreeNode Successor(AATreeNode curNode) {
+		curNode = curNode.right!;
+		while (curNode.left != null) {
+			curNode = curNode.left;
+		}
+		return curNode;
+	}
+
+	private AATreeNode Skew(AATreeNode node) {
+		if (node.left != null) {
+			// Rotate right
+			if (node.level == node.left.level) {
+				var left = node.left;
+				node.left = left.right;
+				left.right = node;
+
+				return left;
+			}
+		}
+		return node;
+	}
+
+	private AATreeNode Split(AATreeNode node) {
+		if (node.right?.right != null) {
+			// Rotate left
+			if (node.right.right.level == node.level) {
+				var right = node.right;
+				node.right = right.left;
+				right.left = node;
+				++right.level;
+
+				return right;
+			}
+		}
+		return node;
+	}
+
+	private AATreeNode? Search(AATreeNode? node, T value) {
+		if (node is null) {
+			return null;
+		}
+		var compare = value.CompareTo(node.value);
+		if (compare < 0) {
+			return this.Search(node.left, value);
+		}
+		if (compare > 0) {
+			return this.Search(node.right, value);
+		}
+		return node;
+	}
+
+	public T FindMin() {
+		if (this.root is null) {
+			throw new Exception("Empty tree");
+		}
+		//TODO impl
+		return default;
+	}
+
+	public T FindMax() {
+		if (this.root is null) {
+			throw new Exception("Empty tree");
+		}
+		//TODO impl
+		return default;
+	}
+
+	public bool IsEmpty() {
+		return this.root is null;
+	}
+
+	public T? Lowerbound(T value) {
+		return this.Lowerbound(this.root, value);
+	}
+
+	private T? Lowerbound(AATreeNode? node, T value) {
+		if (node is null) {
+			throw new Exception("Tree empty");
+		}
+		var compare = value.CompareTo(node.value);
+
+		// Node value > the value
+		// -> Find at left subtree to get smaller value
+		if (compare < 0) {
+			var result = this.Lowerbound(node.left, value);
+			if (result is null) {
+				return node.value;
+			}
+			return result;
+		}
+
+		// Node value < the value
+		// -> Find at right subtree to get bigger value
+		if (compare > 0) {
+			return this.Lowerbound(node.right, value);
+		}
+
+		//TODO find left node more
+		return node.value;
+	}
+
+	private static string NodeToString(AATreeNode? node) {
+		if (node != null) {
+			var sb = new System.Text.StringBuilder();
+			if (node != node.left) {
+				if (sb.Length > 0) { sb.Append(' '); }
+				sb.Append(NodeToString(node.left));
+			}
+			if (sb.Length > 0) { sb.Append(' '); }
+			sb.Append(node.value);
+			if (node != node.right) {
+				if (sb.Length > 0) { sb.Append(' '); }
+				sb.Append(NodeToString(node.right));
+			}
+			return sb.ToString();
+		}
+		return string.Empty;
+	}
+
+	public override string ToString() {
+		return NodeToString(this.root);
+	}
+
+	internal class AATreeNode {
+		// User data
+		public T value;
+
+		// Node internal data
+		internal int level;
+		internal AATreeNode? left;
+		internal AATreeNode? right;
+		/// <summary>
+		/// Hold number of value that equals.
+		/// </summary>
+		internal int count;
+
+		// constuctor for regular nodes (that all start life as leaf nodes)
+		internal AATreeNode(T value, AATreeNode? left, AATreeNode? right) {
+			this.left = left;
+			this.right = right;
+			this.value = value;
+			this.level = 1;
+			this.count = 1;
+		}
+	}
+}
+
+/// <summary>
 /// This performs read/write on ASCII chars which be in range [0, 255] (see: https://www.asciitable.com/).
 /// TechNotes:
 /// - Use hyphen (_) to separate/group long number (but it does not work in mono).
@@ -482,119 +746,82 @@ public class Solution : BaseSolution {
 	// protected override bool inputFromFile => true;
 	// protected override bool outputToFile => true;
 
-	// public static void Main(params string[] args) {
-	//  new Solution().Start();
-	// }
-
-	// protected override void Solve() {
-	//  debugln("ans: " + string.Join(", ", LexicographicallySmallestArray(new int[] { 4, 52, 38, 59, 71, 27, 31, 83, 88, 10 }, 14)));
-	// }
-
-	//
-	public class Node {
-		public int dig;
-		public int area;
-	}
-	public int AreaOfMaxDiagonal(int[][] arr) {
-		var list = new List<Node>();
-		foreach (var item in arr) {
-			var len = item[0];
-			var width = item[1];
-			list.Add(new() { dig = len * len + width * width, area = len * width });
-		}
-		list.Sort((a, b) => {
-			return b.dig - a.dig;
-		});
-		var maxDig = list[0].dig;
-		var maxArea = -1;
-		for (var index = 0; index < list.Count; ++index) {
-			if (maxDig != list[index].dig) {
-				break;
-			}
-			maxArea = Math.Max(maxArea, list[index].area);
-		}
-		return maxArea;
+	public static void Main(params string[] args) {
+		new Solution().Start();
 	}
 
-	//
-	public int MinMovesToCaptureTheQueen(int a, int b, int c, int d, int e, int f) {
-		var rookMove = 2;
-		if (a == e || b == f) {
-			rookMove = 1;
-			if (a == c && d > Math.Min(b, f) && d < Math.Max(b, f)) {
-				++rookMove; // Move bishop
-			}
-			else if (b == d && c > Math.Min(a, e) && c < Math.Max(a, e)) {
-				++rookMove; // Move bishop
-			}
-		}
-
-		var bishopMove = 9999;
-		if (Math.Abs(c - e) == Math.Abs(d - f)) {
-			bishopMove = 1;
-			if (a > Math.Min(c, e) && a < Math.Max(c, e) && b > Math.Min(d, f) && b < Math.Max(d, f)) {
-				if (Math.Abs(a - e) == Math.Abs(b - f)) {
-					++bishopMove;
-				}
-			}
-		}
-
-		return Math.Min(rookMove, bishopMove);
+	protected override void Solve() {
+		debugln("ans: " + string.Join(", ", LexicographicallySmallestArray(new int[] { 7, 73, 1, 97, 13, 55, 74, 29, 76, 19 }, 14)));
 	}
 
-	//
-	public int MaximumSetSize(int[] nums_a, int[] nums_b) {
-		var N = nums_a.Length; // even
-		var setA = new HashSet<int>();
-		var setB = new HashSet<int>();
-		foreach (var num in nums_a) {
-			setA.Add(num);
-		}
-		foreach (var num in nums_b) {
-			setB.Add(num);
+
+	public int[] LexicographicallySmallestArray(int[] nums, int limit) {
+		var N = nums.Length;
+
+		var tr = new AATree<MyNode>();
+		var nodes = new MyNode[N];
+		for (var index = 0; index < N; ++index) {
+			var node = nodes[index] = new MyNode() {
+				num = nums[index],
+				index = index
+			};
+			tr.Add(node);
 		}
 
-		var shared = new HashSet<int>();
-		var remainA = new HashSet<int>();
-		foreach (var num in nums_a) {
-			if (setB.Contains(num)) {
-				shared.Add(num);
+		for (var index = 0; index < N; ++index) {
+			var node = nodes[index];
+			var swapNode = FindSwapNode(tr, node, limit);
+
+			if (swapNode is null) {
+				tr.Remove(node);
+				debugln($"---> Do not swap for node {node.num}({node.index}), tr: {tr}");
+				continue;
 			}
-			else {
-				remainA.Add(num);
-			}
-		}
-		var remainB = new HashSet<int>();
-		foreach (var num in nums_b) {
-			if (setA.Contains(num)) {
-				shared.Add(num);
-			}
-			else {
-				remainB.Add(num);
-			}
+
+			(nums[index], nums[swapNode.index]) = (nums[swapNode.index], nums[index]);
+			(nodes[index], nodes[swapNode.index]) = (nodes[swapNode.index], nodes[index]);
+
+			(nodes[swapNode.index].index, nodes[index].index) = (nodes[index].index, nodes[swapNode.index].index);
+
+			tr.Remove(swapNode);
+
+			debugln($"---> Swapped node {node.num}({node.index}) vs {swapNode.num}({swapNode.index}), nums: {string.Join(", ", nums)}, tr: {tr}");
 		}
 
-		var count1 = Math.Min(N / 2, remainA.Count);
-		var count2 = Math.Min(N / 2, remainB.Count);
-
-		var sharedTookByA = 0;
-		if (count1 < N / 2) {
-			sharedTookByA = Math.Min(N / 2 - count1, shared.Count);
-			count1 += sharedTookByA;
-		}
-		var sharedTookByB = shared.Count - sharedTookByA;
-		if (count2 < N / 2) {
-			if (sharedTookByA < shared.Count) {
-				sharedTookByB = Math.Min(N / 2 - count2, Math.Max(0, shared.Count - sharedTookByA));
-				count2 += sharedTookByB;
-			}
-		}
-
-		return count1 + count2;
+		return nums;
 	}
 
-	//
-	// public int MaxPartitionsAfterOperations(string s, int k) {
-	// 	var N = s.Length;
-	// }
+	private readonly MyNode lowerMyNode = new();
+	private MyNode? FindSwapNode(AATree<MyNode> tr, MyNode node, int limit) {
+		MyNode? bestNode = null;
+		var curNode = node;
+		var count = 0;
+		while (true) {
+			++count;
+			// num - target <= limit
+			// target >= num - limit
+			this.lowerMyNode.num = curNode.num - limit;
+			var resultNode = tr.Lowerbound(this.lowerMyNode);
+			if (resultNode is null || resultNode.num >= curNode.num) {
+				debugln($"1.{count} lowerbound of {curNode.num}-{limit} is {resultNode?.num}({resultNode?.index})");
+				return bestNode;
+			}
+			debugln($"2.{count} lowerbound of {curNode.num}-{limit} is {resultNode.num}({resultNode.index})");
+			bestNode = resultNode;
+			curNode = resultNode;
+		}
+	}
+}
+
+public class MyNode : IComparable<MyNode> {
+	public int num;
+	public int index;
+
+	public int CompareTo(MyNode that) {
+		return this.num - that.num;
+	}
+
+	public override string ToString() {
+		return this.num + string.Empty;
+	}
 }
