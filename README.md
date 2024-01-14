@@ -28,4 +28,7 @@ This project is written mainly in C# and should be run with Mono.
 	# Ref
 	C++: https://atcoder.jp/contests/abc310/submissions/43606683
 	C#: https://atcoder.jp/contests/abc310/submissions/43585432
+
+	# Disjoint set
+	https://www.sanfoundry.com/cpp-program-implement-disjoint-set-data-structure/
 	```

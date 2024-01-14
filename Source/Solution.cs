@@ -3,270 +3,6 @@
 #pragma warning disable IDE0058 // 式の値が使用されていません
 
 /// <summary>
-/// Ref:
-/// https://users.cs.fiu.edu/~weiss/dsaa_c++/code/AATree.cpp
-/// https://github.com/JuYanYan/AA-Tree/blob/master/aatree.cpp
-/// </summary>
-/// <typeparam name="T"></typeparam>
-public class AATree<T> where T : IComparable<T> {
-	private AATreeNode? root;
-
-	public AATree() {
-	}
-
-	public void Add(T value) {
-		this.root = this.Insert(this.root, value);
-	}
-
-	private AATreeNode Insert(AATreeNode? node, T value) {
-		if (node is null) {
-			return new AATreeNode(value, null, null);
-		}
-
-		var compare = value.CompareTo(node.value);
-		if (compare == 0) {
-			++node.count;
-			return node;
-		}
-
-		if (compare < 0) {
-			node.left = this.Insert(node.left, value);
-		}
-		else {
-			node.right = this.Insert(node.right, value);
-		}
-
-		node = this.Skew(node);
-		node = this.Split(node);
-
-		return node;
-	}
-
-	public bool Remove(T value) {
-		this.root = this.Delete(this.root, value);
-		return this.root != null;
-	}
-
-	private AATreeNode? Delete(AATreeNode? node, T value) {
-		if (node is null) {
-			return null;
-		}
-
-		var compare = value.CompareTo(node.value);
-		if (compare < 0) {
-			node.left = this.Delete(node.left, value);
-		}
-		else if (compare > 0) {
-			node.right = this.Delete(node.right, value);
-		}
-		else {
-			--node.count;
-			if (node.left is null && node.right is null) {
-				return node.count == 0 ? null : node;
-			}
-
-			if (node.left is null) {
-				var suc = Successor(node);
-				node.value = suc.value; // Exchange position.
-				node.right = this.Delete(node.right, suc.value); // Delete successor node.
-			}
-			else {
-				var pre = Predecessor(node);
-				node.value = pre.value; // Similar to the above.
-				node.left = this.Delete(node.left, pre.value);
-			}
-		}
-
-		node = DecreaseLevel(node);
-		node = this.Skew(node);
-		var right = node.right;
-
-		if (right != null) {
-			node.right = this.Skew(right);
-
-			if (right.right != null) {
-				node.right.right = this.Skew(right.right);
-			}
-		}
-
-		node = this.Split(node);
-		if (right != null) {
-			node.right = this.Split(right);
-		}
-
-		return node;
-	}
-
-	static AATreeNode DecreaseLevel(AATreeNode node) {
-		int wdo;
-		if (node.left != null && node.right != null) {
-			wdo = Math.Min(node.left.level, node.right.level) + 1;
-			if (wdo < node.level) {
-				node.level = wdo;
-				if (node.right != null && wdo < node.right.level) {
-					node.right.level = wdo;
-				}
-			}
-		}
-		return node;
-	}
-
-	static AATreeNode Predecessor(AATreeNode curNode) {
-		curNode = curNode.left!;
-		while (curNode.right != null) {
-			curNode = curNode.right;
-		}
-		return curNode;
-	}
-
-	static AATreeNode Successor(AATreeNode curNode) {
-		curNode = curNode.right!;
-		while (curNode.left != null) {
-			curNode = curNode.left;
-		}
-		return curNode;
-	}
-
-	private AATreeNode Skew(AATreeNode node) {
-		if (node.left != null) {
-			// Rotate right
-			if (node.level == node.left.level) {
-				var left = node.left;
-				node.left = left.right;
-				left.right = node;
-
-				return left;
-			}
-		}
-		return node;
-	}
-
-	private AATreeNode Split(AATreeNode node) {
-		if (node.right?.right != null) {
-			// Rotate left
-			if (node.right.right.level == node.level) {
-				var right = node.right;
-				node.right = right.left;
-				right.left = node;
-				++right.level;
-
-				return right;
-			}
-		}
-		return node;
-	}
-
-	private AATreeNode? Search(AATreeNode? node, T value) {
-		if (node is null) {
-			return null;
-		}
-		var compare = value.CompareTo(node.value);
-		if (compare < 0) {
-			return this.Search(node.left, value);
-		}
-		if (compare > 0) {
-			return this.Search(node.right, value);
-		}
-		return node;
-	}
-
-	public T FindMin() {
-		if (this.root is null) {
-			throw new Exception("Empty tree");
-		}
-		//TODO impl
-		return default;
-	}
-
-	public T FindMax() {
-		if (this.root is null) {
-			throw new Exception("Empty tree");
-		}
-		//TODO impl
-		return default;
-	}
-
-	public bool IsEmpty() {
-		return this.root is null;
-	}
-
-	public T? Lowerbound(T value) {
-		return this.Lowerbound(this.root, value);
-	}
-
-	private T? Lowerbound(AATreeNode? node, T value) {
-		if (node is null) {
-			throw new Exception("Tree empty");
-		}
-		var compare = value.CompareTo(node.value);
-
-		// Node value > the value
-		// -> Find at left subtree to get smaller value
-		if (compare < 0) {
-			var result = this.Lowerbound(node.left, value);
-			if (result is null) {
-				return node.value;
-			}
-			return result;
-		}
-
-		// Node value < the value
-		// -> Find at right subtree to get bigger value
-		if (compare > 0) {
-			return this.Lowerbound(node.right, value);
-		}
-
-		//TODO find left node more
-		return node.value;
-	}
-
-	private static string NodeToString(AATreeNode? node) {
-		if (node != null) {
-			var sb = new System.Text.StringBuilder();
-			if (node != node.left) {
-				if (sb.Length > 0) { sb.Append(' '); }
-				sb.Append(NodeToString(node.left));
-			}
-			if (sb.Length > 0) { sb.Append(' '); }
-			sb.Append(node.value);
-			if (node != node.right) {
-				if (sb.Length > 0) { sb.Append(' '); }
-				sb.Append(NodeToString(node.right));
-			}
-			return sb.ToString();
-		}
-		return string.Empty;
-	}
-
-	public override string ToString() {
-		return NodeToString(this.root);
-	}
-
-	internal class AATreeNode {
-		// User data
-		public T value;
-
-		// Node internal data
-		internal int level;
-		internal AATreeNode? left;
-		internal AATreeNode? right;
-		/// <summary>
-		/// Hold number of value that equals.
-		/// </summary>
-		internal int count;
-
-		// constuctor for regular nodes (that all start life as leaf nodes)
-		internal AATreeNode(T value, AATreeNode? left, AATreeNode? right) {
-			this.left = left;
-			this.right = right;
-			this.value = value;
-			this.level = 1;
-			this.count = 1;
-		}
-	}
-}
-
-/// <summary>
 /// This performs read/write on ASCII chars which be in range [0, 255] (see: https://www.asciitable.com/).
 /// TechNotes:
 /// - Use hyphen (_) to separate/group long number (but it does not work in mono).
@@ -767,6 +503,7 @@ public class Solution : BaseSolution {
 			};
 			tr.Add(node);
 		}
+		debugln($"tr: {tr}");
 
 		for (var index = 0; index < N; ++index) {
 			var node = nodes[index];
@@ -779,8 +516,8 @@ public class Solution : BaseSolution {
 			}
 
 			(nums[index], nums[swapNode.index]) = (nums[swapNode.index], nums[index]);
-			(nodes[index], nodes[swapNode.index]) = (nodes[swapNode.index], nodes[index]);
 
+			(nodes[index], nodes[swapNode.index]) = (nodes[swapNode.index], nodes[index]);
 			(nodes[swapNode.index].index, nodes[index].index) = (nodes[index].index, nodes[swapNode.index].index);
 
 			tr.Remove(swapNode);
@@ -801,8 +538,7 @@ public class Solution : BaseSolution {
 			// num - target <= limit
 			// target >= num - limit
 			this.lowerMyNode.num = curNode.num - limit;
-			var resultNode = tr.Lowerbound(this.lowerMyNode);
-			if (resultNode is null || resultNode.num >= curNode.num) {
+			if (!tr.Lowerbound(this.lowerMyNode, out var resultNode) || resultNode!.num >= curNode.num) {
 				debugln($"1.{count} lowerbound of {curNode.num}-{limit} is {resultNode?.num}({resultNode?.index})");
 				return bestNode;
 			}
@@ -823,5 +559,279 @@ public class MyNode : IComparable<MyNode> {
 
 	public override string ToString() {
 		return this.num + string.Empty;
+	}
+}
+
+
+/// <summary>
+/// Ref:
+/// https://users.cs.fiu.edu/~weiss/dsaa_c++/code/AATree.cpp
+/// https://github.com/JuYanYan/AA-Tree/blob/master/aatree.cpp
+/// </summary>
+/// <typeparam name="T"></typeparam>
+public class AATree<T> where T : IComparable<T> {
+	private AATreeNode? root;
+
+	public AATree() {
+	}
+
+	public void Add(T value) {
+		this.root = Insert(this.root, value);
+	}
+
+	private static AATreeNode Insert(AATreeNode? node, T value) {
+		if (node is null) {
+			return new AATreeNode(value, null, null);
+		}
+
+		var compare = value.CompareTo(node.value);
+		if (compare == 0) {
+			// Add to bucket for value that equals to this node's value but different instance.
+			if (!value.Equals(node.value)) {
+				node.bucket ??= new();
+				node.bucket.Add(value);
+			}
+			return node;
+		}
+
+		if (compare < 0) {
+			node.left = Insert(node.left, value);
+		}
+		else {
+			node.right = Insert(node.right, value);
+		}
+
+		node = Skew(node);
+		node = Split(node);
+
+		return node;
+	}
+
+	public bool Remove(T value) {
+		this.root = this.Delete(this.root, value);
+		return this.root != null;
+	}
+
+	private AATreeNode? Delete(AATreeNode? node, T value) {
+		if (node is null) {
+			return null;
+		}
+
+		var compare = value.CompareTo(node.value);
+		if (compare < 0) {
+			node.left = this.Delete(node.left, value);
+		}
+		else if (compare > 0) {
+			node.right = this.Delete(node.right, value);
+		}
+		else {
+			if (node.bucket != null && node.bucket.Remove(value)) {
+				return node;
+			}
+
+			if (node.left is null && node.right is null) {
+				return node.bucket?.Count == 0 ? null : node;
+			}
+
+			if (node.left is null) {
+				var sucNode = Successor(node);
+				node.value = sucNode.value; // Exchange position.
+				node.right = this.Delete(node.right, sucNode.value); // Delete successor node.
+			}
+			else {
+				var preNode = Predecessor(node);
+				node.value = preNode.value; // Similar to the above.
+				node.left = this.Delete(node.left, preNode.value);
+			}
+		}
+
+		node = DecreaseLevel(node);
+		node = Skew(node);
+		var right = node.right;
+
+		if (right != null) {
+			node.right = Skew(right);
+
+			if (right.right != null) {
+				node.right.right = Skew(right.right);
+			}
+		}
+
+		node = Split(node);
+		if (right != null) {
+			node.right = Split(right);
+		}
+
+		return node;
+	}
+
+	static AATreeNode DecreaseLevel(AATreeNode node) {
+		if (node.left != null && node.right != null) {
+			var minLevel = Math.Min(node.left.level, node.right.level) + 1;
+			if (minLevel < node.level) {
+				node.level = minLevel;
+				if (node.right != null && minLevel < node.right.level) {
+					node.right.level = minLevel;
+				}
+			}
+		}
+		return node;
+	}
+
+	static AATreeNode Predecessor(AATreeNode curNode) {
+		curNode = curNode.left!;
+		while (curNode.right != null) {
+			curNode = curNode.right;
+		}
+		return curNode;
+	}
+
+	static AATreeNode Successor(AATreeNode curNode) {
+		curNode = curNode.right!;
+		while (curNode.left != null) {
+			curNode = curNode.left;
+		}
+		return curNode;
+	}
+
+	private static AATreeNode Skew(AATreeNode node) {
+		if (node.left != null) {
+			// Rotate right
+			if (node.level == node.left.level) {
+				var left = node.left;
+				node.left = left.right;
+				left.right = node;
+
+				return left;
+			}
+		}
+		return node;
+	}
+
+	private static AATreeNode Split(AATreeNode node) {
+		if (node.right?.right != null) {
+			// Rotate left
+			if (node.right.right.level == node.level) {
+				var right = node.right;
+				node.right = right.left;
+				right.left = node;
+				++right.level;
+
+				return right;
+			}
+		}
+		return node;
+	}
+
+	private static AATreeNode? Search(AATreeNode? node, T value) {
+		if (node is null) {
+			return null;
+		}
+		var compare = value.CompareTo(node.value);
+		if (compare < 0) {
+			return Search(node.left, value);
+		}
+		if (compare > 0) {
+			return Search(node.right, value);
+		}
+		return node;
+	}
+
+	public T FindMin() {
+		if (this.root is null) {
+			throw new Exception("Empty tree");
+		}
+		//TODO impl
+		return default;
+	}
+
+	public T FindMax() {
+		if (this.root is null) {
+			throw new Exception("Empty tree");
+		}
+		//TODO impl
+		return default;
+	}
+
+	public bool IsEmpty() {
+		return this.root is null;
+	}
+
+	public bool Lowerbound(T value, out T? result) {
+		return Lowerbound(this.root, value, out result);
+	}
+
+	private static bool Lowerbound(AATreeNode? node, T value, out T? result) {
+		if (node is null) {
+			result = default;
+			return false;
+		}
+
+		var compare = value.CompareTo(node.value);
+
+		// Node value > the value
+		// -> Find at left subtree to get smaller value
+		if (compare < 0) {
+			if (Lowerbound(node.left, value, out result)) {
+				return true;
+			}
+			result = node.value;
+			return true;
+		}
+
+		// Node value < the value
+		// -> Find at right subtree to get bigger value
+		if (compare > 0) {
+			if (Lowerbound(node.right, value, out result)) {
+				return true;
+			}
+			result = default;
+			return false;
+		}
+
+		result = node.value;
+		return true;
+	}
+
+	private static string NodeToString(AATreeNode? node) {
+		if (node != null) {
+			var sb = new System.Text.StringBuilder();
+			if (node != node.left) {
+				if (sb.Length > 0) { sb.Append(' '); }
+				sb.Append(NodeToString(node.left));
+			}
+			if (sb.Length > 0) { sb.Append(' '); }
+			sb.Append(node.value);
+			if (node != node.right) {
+				if (sb.Length > 0) { sb.Append(' '); }
+				sb.Append(NodeToString(node.right));
+			}
+			return sb.ToString();
+		}
+		return string.Empty;
+	}
+
+	public override string ToString() {
+		return NodeToString(this.root);
+	}
+
+	internal class AATreeNode {
+		// User data
+		public T value;
+
+		// Node internal data
+		internal int level;
+		internal AATreeNode? left;
+		internal AATreeNode? right;
+
+		internal HashSet<T>? bucket;
+
+		// constuctor for regular nodes (that all start life as leaf nodes)
+		internal AATreeNode(T value, AATreeNode? left, AATreeNode? right) {
+			this.left = left;
+			this.right = right;
+			this.value = value;
+			this.level = 1;
+		}
 	}
 }

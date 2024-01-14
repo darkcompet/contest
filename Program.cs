@@ -7,3 +7,6 @@ Solution.Main(args);
 // 	buffer.AddRange(System.Text.Encoding.UTF8.GetBytes($"() https://leetcode.com/contest/weekly-contest-{379-i}\n"));
 // }
 // await fs.WriteAsync(buffer.ToArray());
+
+// string x = null;
+// Console.WriteLine(x?.Length == null ? "zero" : "len");
