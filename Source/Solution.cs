@@ -9,8 +9,9 @@
 /// - Use new keyword to override base method that does not declare with virtual keyword.
 /// </summary>
 public abstract class BaseSolution {
-	protected virtual bool inputFromFile { get; set; }
-	protected virtual bool outputToFile { get; set; }
+	protected readonly bool isDebug;
+	protected bool inputFromFile;
+	protected bool outputToFile;
 
 	/// <summary>
 	/// Subclass can override this method to give the solution.
@@ -36,6 +37,9 @@ public abstract class BaseSolution {
 	private readonly byte[] scratchBytes = new byte[32];
 
 	public BaseSolution() {
+		// Before dotnet 6, we should use Path.GetFileName() instead.
+		// From dotnet 7, we can use Path.Exists() to test the file.
+		this.isDebug = System.IO.Path.GetFileName(".compet.local.proof") != null;
 	}
 
 	protected void Start() {
@@ -466,10 +470,14 @@ public abstract class BaseSolution {
 	}
 
 	protected void debug(string text) {
-		Console.Write(text);
+		if (this.isDebug) {
+			Console.Write(text);
+		}
 	}
 	protected void debugln(string text) {
-		Console.WriteLine(text);
+		if (this.isDebug) {
+			Console.WriteLine(text);
+		}
 	}
 
 	protected void assert(bool condition, string? message = null) {
@@ -479,359 +487,134 @@ public abstract class BaseSolution {
 
 /// Run: dotnet run
 public class Solution : BaseSolution {
-	// protected override bool inputFromFile => true;
-	// protected override bool outputToFile => true;
+	// public static void Main(params string[] args) {
+	// 	var sol = new Solution();
+	// 	sol.inputFromFile = sol.isDebug;
+	// 	sol.Start();
+	// }
 
-	public static void Main(params string[] args) {
-		new Solution().Start();
-	}
+	// protected override void Solve() {
+	// 	debugln("ans: " + string.Join(", ", BeautifulIndices("isawsquirrelnearmysquirrelhouseohmy", "my", "squirrel", 15)));
+	// }
 
-	protected override void Solve() {
-		debugln("ans: " + string.Join(", ", LexicographicallySmallestArray(new int[] { 7, 73, 1, 97, 13, 55, 74, 29, 76, 19 }, 14)));
-	}
+	public IList<int> BeautifulIndices(string s, string a, string b, int k) {
+		var indices = new List<int>();
+		var N = s.Length;
 
+		var aIndices = this.KMPSearch(s, a);
+		var bIndices = this.KMPSearch(s, b);
 
-	public int[] LexicographicallySmallestArray(int[] nums, int limit) {
-		var N = nums.Length;
-
-		var tr = new AATree<MyNode>();
-		var nodes = new MyNode[N];
-		for (var index = 0; index < N; ++index) {
-			var node = nodes[index] = new MyNode() {
-				num = nums[index],
-				index = index
-			};
-			tr.Add(node);
-		}
-		debugln($"tr: {tr}");
-
-		for (var index = 0; index < N; ++index) {
-			var node = nodes[index];
-			var swapNode = FindSwapNode(tr, node, limit);
-
-			if (swapNode is null) {
-				tr.Remove(node);
-				debugln($"---> Do not swap for node {node.num}({node.index}), tr: {tr}");
-				continue;
+		bIndices.Sort();
+		foreach (var ai in aIndices) {
+			// ai - k <= bi <= ai + k
+			var bIndex = this.LowerBound(bIndices, ai - k, 0, bIndices.Count - 1);
+			if (bIndex >= 0 && bIndices[bIndex] <= ai + k) {
+				indices.Add(ai);
 			}
-
-			(nums[index], nums[swapNode.index]) = (nums[swapNode.index], nums[index]);
-
-			(nodes[index], nodes[swapNode.index]) = (nodes[swapNode.index], nodes[index]);
-			(nodes[swapNode.index].index, nodes[index].index) = (nodes[index].index, nodes[swapNode.index].index);
-
-			tr.Remove(swapNode);
-
-			debugln($"---> Swapped node {node.num}({node.index}) vs {swapNode.num}({swapNode.index}), nums: {string.Join(", ", nums)}, tr: {tr}");
 		}
 
-		return nums;
+		indices.Sort();
+		return indices;
 	}
 
-	private readonly MyNode lowerMyNode = new();
-	private MyNode? FindSwapNode(AATree<MyNode> tr, MyNode node, int limit) {
-		MyNode? bestNode = null;
-		var curNode = node;
-		var count = 0;
-		while (true) {
-			++count;
-			// num - target <= limit
-			// target >= num - limit
-			this.lowerMyNode.num = curNode.num - limit;
-			if (!tr.Lowerbound(this.lowerMyNode, out var resultNode) || resultNode!.num >= curNode.num) {
-				debugln($"1.{count} lowerbound of {curNode.num}-{limit} is {resultNode?.num}({resultNode?.index})");
-				return bestNode;
-			}
-			debugln($"2.{count} lowerbound of {curNode.num}-{limit} is {resultNode.num}({resultNode.index})");
-			bestNode = resultNode;
-			curNode = resultNode;
+	public int LowerBound(List<int> values, int target, int startIndex, int endIndex) {
+		if (startIndex < 0 || startIndex > endIndex || endIndex >= values.Count) {
+			return -1;
 		}
-	}
-}
+		var midIndex = 0;
 
-public class MyNode : IComparable<MyNode> {
-	public int num;
-	public int index;
-
-	public int CompareTo(MyNode that) {
-		return this.num - that.num;
-	}
-
-	public override string ToString() {
-		return this.num + string.Empty;
-	}
-}
-
-
-/// <summary>
-/// Ref:
-/// https://users.cs.fiu.edu/~weiss/dsaa_c++/code/AATree.cpp
-/// https://github.com/JuYanYan/AA-Tree/blob/master/aatree.cpp
-/// </summary>
-/// <typeparam name="T"></typeparam>
-public class AATree<T> where T : IComparable<T> {
-	private AATreeNode? root;
-
-	public AATree() {
-	}
-
-	public void Add(T value) {
-		this.root = Insert(this.root, value);
-	}
-
-	private static AATreeNode Insert(AATreeNode? node, T value) {
-		if (node is null) {
-			return new AATreeNode(value, null, null);
-		}
-
-		var compare = value.CompareTo(node.value);
-		if (compare == 0) {
-			// Add to bucket for value that equals to this node's value but different instance.
-			if (!value.Equals(node.value)) {
-				node.bucket ??= new();
-				node.bucket.Add(value);
-			}
-			return node;
-		}
-
-		if (compare < 0) {
-			node.left = Insert(node.left, value);
-		}
-		else {
-			node.right = Insert(node.right, value);
-		}
-
-		node = Skew(node);
-		node = Split(node);
-
-		return node;
-	}
-
-	public bool Remove(T value) {
-		this.root = this.Delete(this.root, value);
-		return this.root != null;
-	}
-
-	private AATreeNode? Delete(AATreeNode? node, T value) {
-		if (node is null) {
-			return null;
-		}
-
-		var compare = value.CompareTo(node.value);
-		if (compare < 0) {
-			node.left = this.Delete(node.left, value);
-		}
-		else if (compare > 0) {
-			node.right = this.Delete(node.right, value);
-		}
-		else {
-			if (node.bucket != null && node.bucket.Remove(value)) {
-				return node;
-			}
-
-			if (node.left is null && node.right is null) {
-				return node.bucket?.Count == 0 ? null : node;
-			}
-
-			if (node.left is null) {
-				var sucNode = Successor(node);
-				node.value = sucNode.value; // Exchange position.
-				node.right = this.Delete(node.right, sucNode.value); // Delete successor node.
+		while (startIndex < endIndex) {
+			midIndex = (startIndex + endIndex) >> 1;
+			if (target <= values[midIndex]) { // Equals means Leftmost
+				endIndex = midIndex;
 			}
 			else {
-				var preNode = Predecessor(node);
-				node.value = preNode.value; // Similar to the above.
-				node.left = this.Delete(node.left, preNode.value);
+				startIndex = midIndex + 1;
 			}
 		}
 
-		node = DecreaseLevel(node);
-		node = Skew(node);
-		var right = node.right;
+		// Assert: startIndex == endIndex
+		midIndex = startIndex;
 
-		if (right != null) {
-			node.right = Skew(right);
-
-			if (right.right != null) {
-				node.right.right = Skew(right.right);
-			}
+		if (midIndex - 1 >= startIndex && values[midIndex - 1] >= target) {
+			return midIndex - 1;
+		}
+		if (values[midIndex] >= target) {
+			return midIndex;
+		}
+		if (midIndex + 1 <= endIndex && values[midIndex + 1] >= target) {
+			return midIndex + 1;
 		}
 
-		node = Split(node);
-		if (right != null) {
-			node.right = Split(right);
-		}
-
-		return node;
+		return -1;
 	}
 
-	static AATreeNode DecreaseLevel(AATreeNode node) {
-		if (node.left != null && node.right != null) {
-			var minLevel = Math.Min(node.left.level, node.right.level) + 1;
-			if (minLevel < node.level) {
-				node.level = minLevel;
-				if (node.right != null && minLevel < node.right.level) {
-					node.right.level = minLevel;
+	public List<int> KMPSearch(string s, string pattern) {
+		var indices = new List<int>();
+		var M = pattern.Length;
+		var N = s.Length;
+
+		// Create lps[] that will hold the longest prefix suffix values for pattern
+		var lps = new int[M];
+		// Index for pat[]
+		var j = 0;
+
+		// Preprocess the pattern (calculate lps[] array)
+		this.ComputeLPSArray(pattern, M, lps);
+
+		// Index for txt[]
+		var index = 0;
+		while (index < N) {
+			if (pattern[j] == s[index]) {
+				++j;
+				++index;
+			}
+
+			if (j == M) {
+				// Console.Write("Found pattern " + "at index " + (index - j));
+				indices.Add(index - j);
+				j = lps[j - 1];
+			}
+			// Mismatch after j matches
+			else if (index < N && pattern[j] != s[index]) {
+				// Do not match lps[0..lps[j-1]] characters, they will match anyway
+				if (j != 0) {
+					j = lps[j - 1];
+				}
+				else {
+					++index;
 				}
 			}
 		}
-		return node;
+		return indices;
 	}
 
-	static AATreeNode Predecessor(AATreeNode curNode) {
-		curNode = curNode.left!;
-		while (curNode.right != null) {
-			curNode = curNode.right;
-		}
-		return curNode;
-	}
+	private void ComputeLPSArray(string pat, int M, int[] lps) {
+		// Length of the previous longest prefix suffix
+		var len = 0;
+		var index = 1;
 
-	static AATreeNode Successor(AATreeNode curNode) {
-		curNode = curNode.right!;
-		while (curNode.left != null) {
-			curNode = curNode.left;
-		}
-		return curNode;
-	}
+		lps[0] = 0;
 
-	private static AATreeNode Skew(AATreeNode node) {
-		if (node.left != null) {
-			// Rotate right
-			if (node.level == node.left.level) {
-				var left = node.left;
-				node.left = left.right;
-				left.right = node;
-
-				return left;
+		// The loop calculates lps[i] for i = 1 to M-1
+		while (index < M) {
+			if (pat[index] == pat[len]) {
+				len++;
+				lps[index] = len;
+				index++;
 			}
-		}
-		return node;
-	}
-
-	private static AATreeNode Split(AATreeNode node) {
-		if (node.right?.right != null) {
-			// Rotate left
-			if (node.right.right.level == node.level) {
-				var right = node.right;
-				node.right = right.left;
-				right.left = node;
-				++right.level;
-
-				return right;
+			else {
+				// This is tricky. Consider the example.
+				// AAACAAAA and i = 7. The idea is similar to search step.
+				if (len != 0) {
+					len = lps[len - 1];
+					// Also, note that we do not increment i here
+				}
+				else {
+					lps[index] = len;
+					index++;
+				}
 			}
-		}
-		return node;
-	}
-
-	private static AATreeNode? Search(AATreeNode? node, T value) {
-		if (node is null) {
-			return null;
-		}
-		var compare = value.CompareTo(node.value);
-		if (compare < 0) {
-			return Search(node.left, value);
-		}
-		if (compare > 0) {
-			return Search(node.right, value);
-		}
-		return node;
-	}
-
-	public T FindMin() {
-		if (this.root is null) {
-			throw new Exception("Empty tree");
-		}
-		//TODO impl
-		return default;
-	}
-
-	public T FindMax() {
-		if (this.root is null) {
-			throw new Exception("Empty tree");
-		}
-		//TODO impl
-		return default;
-	}
-
-	public bool IsEmpty() {
-		return this.root is null;
-	}
-
-	public bool Lowerbound(T value, out T? result) {
-		return Lowerbound(this.root, value, out result);
-	}
-
-	private static bool Lowerbound(AATreeNode? node, T value, out T? result) {
-		if (node is null) {
-			result = default;
-			return false;
-		}
-
-		var compare = value.CompareTo(node.value);
-
-		// Node value > the value
-		// -> Find at left subtree to get smaller value
-		if (compare < 0) {
-			if (Lowerbound(node.left, value, out result)) {
-				return true;
-			}
-			result = node.value;
-			return true;
-		}
-
-		// Node value < the value
-		// -> Find at right subtree to get bigger value
-		if (compare > 0) {
-			if (Lowerbound(node.right, value, out result)) {
-				return true;
-			}
-			result = default;
-			return false;
-		}
-
-		result = node.value;
-		return true;
-	}
-
-	private static string NodeToString(AATreeNode? node) {
-		if (node != null) {
-			var sb = new System.Text.StringBuilder();
-			if (node != node.left) {
-				if (sb.Length > 0) { sb.Append(' '); }
-				sb.Append(NodeToString(node.left));
-			}
-			if (sb.Length > 0) { sb.Append(' '); }
-			sb.Append(node.value);
-			if (node != node.right) {
-				if (sb.Length > 0) { sb.Append(' '); }
-				sb.Append(NodeToString(node.right));
-			}
-			return sb.ToString();
-		}
-		return string.Empty;
-	}
-
-	public override string ToString() {
-		return NodeToString(this.root);
-	}
-
-	internal class AATreeNode {
-		// User data
-		public T value;
-
-		// Node internal data
-		internal int level;
-		internal AATreeNode? left;
-		internal AATreeNode? right;
-
-		internal HashSet<T>? bucket;
-
-		// constuctor for regular nodes (that all start life as leaf nodes)
-		internal AATreeNode(T value, AATreeNode? left, AATreeNode? right) {
-			this.left = left;
-			this.right = right;
-			this.value = value;
-			this.level = 1;
 		}
 	}
 }
