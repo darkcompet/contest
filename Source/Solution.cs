@@ -487,15 +487,15 @@ public abstract class BaseSolution {
 
 /// Run: dotnet run
 public class Solution : BaseSolution {
-	public static void Main(params string[] args) {
-		var sol = new Solution();
-		sol.inputFromFile = sol.isDebug;
-		sol.Start();
-	}
+	// public static void Main(params string[] args) {
+	// 	var sol = new Solution();
+	// 	sol.inputFromFile = sol.isDebug;
+	// 	sol.Start();
+	// }
 
-	protected override void Solve() {
-		this.debugln("ans: " + string.Join(", ", this.LexicographicallySmallestArray(new int[] { 59, 24, 38, 8, 92, 78, 7, 95, 73, 7 }, 10)));
-	}
+	// protected override void Solve() {
+	// 	this.debugln("ans: " + string.Join(", ", this.LexicographicallySmallestArray(new int[] { 59, 24, 38, 8, 92, 78, 7, 95, 73, 7 }, 10)));
+	// }
 
 	public int[] LexicographicallySmallestArray(int[] nums, int limit) {
 		var N = nums.Length;
@@ -620,7 +620,15 @@ public class AATree<T> where T : IComparable<T> {
 		return this.root != null;
 	}
 
-	private AATreeNode? Delete(AATreeNode? node, T value) {
+	/// <summary>
+	/// https://en.wikipedia.org/wiki/AA_tree
+	/// </summary>
+	/// <param name="node"></param>
+	/// <param name="value"></param>
+	/// <param name="force"></param>
+	/// <returns></returns>
+	private AATreeNode? Delete(AATreeNode? node, T value, bool force = false) {
+		// Console.WriteLine($"----> going to delete node: {node?.value.ToString()}, tr: {this}");
 		if (node is null) {
 			return null;
 		}
@@ -635,6 +643,9 @@ public class AATree<T> where T : IComparable<T> {
 			node.right = this.Delete(node.right, value);
 		}
 		else {
+			if (force) {
+				return node;
+			}
 			// Try remove from bucket first.
 			// -> If found node's value that equals to the value, just remove the value from bucket.
 			if (node.bucket != null && node.bucket.Remove(value)) {
@@ -660,45 +671,51 @@ public class AATree<T> where T : IComparable<T> {
 			if (node.left is null && node.right is null) {
 				return null;
 			}
-			Console.WriteLine($"-------> 0. tr: {this}");
 			// -> Remove successor node
 			if (node.left is null) {
+				// Successor is leaf node. Find it by go one right, then turn left until meet leaf node.
 				var successorNode = this.Successor(node);
+				// Console.WriteLine($"-------> 011. successor: {successorNode.value}, tr: {this}");
+				// Remove the node by overwrite successor data to it
 				node.value = successorNode.value;
-				node.right = this.Delete(node.right, successorNode.value);
-				Console.WriteLine($"-------> 01. tr: {this}");
+				node.bucket = successorNode.bucket;
+				node.right = this.Delete(node.right, successorNode.value, true);
+				// Console.WriteLine($"-------> 012. node: {node.value}, tr: {this}");
 			}
 			// -> Remove predecessor node
 			else {
+				// Predecessor is leaf node. Find it by go one left, then turn right until meet leaf node.
 				var predecessorNode = this.Predecessor(node);
-				Console.Write($"---> predecessor: {predecessorNode.value}, ");
+				// Console.WriteLine($"-------> 021. predecessor: {predecessorNode.value}, tr: {this}");
+				// Remove the node by overwrite predecessor data to it
 				node.value = predecessorNode.value;
-				node.left = this.Delete(node.left, predecessorNode.value);
-				Console.WriteLine($"-------> 02. tr: {this}");
+				node.bucket = predecessorNode.bucket;
+				node.left = this.Delete(node.left, predecessorNode.value, true);
+				// Console.WriteLine($"-------> 022. node: {node.value}, tr: {this}");
 			}
 		}
 
-		Console.WriteLine($"-------> 1. tr: {this}");
+		// Console.WriteLine($"-------> 1. tr: {this}");
 		node = this.DecreaseLevel(node);
-		Console.WriteLine($"-------> 2. tr: {this}");
+		// Console.WriteLine($"-------> 2. tr: {this}");
 		node = this.Skew(node);
-		Console.WriteLine($"-------> 3. tr: {this}");
+		// Console.WriteLine($"-------> 3. tr: {this}");
 
 		if (node.right != null) {
 			node.right = this.Skew(node.right);
-			Console.WriteLine($"-------> 4. tr: {this}");
+			// Console.WriteLine($"-------> 4. tr: {this}");
 
 			if (node.right.right != null) {
 				node.right.right = this.Skew(node.right.right);
-				Console.WriteLine($"-------> 5. tr: {this}");
+				// Console.WriteLine($"-------> 5. tr: {this}");
 			}
 		}
 
 		node = this.Split(node);
-		Console.WriteLine($"-------> 6. tr: {this}");
+		// Console.WriteLine($"-------> 6. tr: {this}");
 		if (node.right != null) {
 			node.right = this.Split(node.right);
-			Console.WriteLine($"-------> 7. tr: {this}");
+			// Console.WriteLine($"-------> 7. tr: {this}");
 		}
 
 		return node;
@@ -843,11 +860,11 @@ public class AATree<T> where T : IComparable<T> {
 		if (node != node.left) {
 			var leftExp = this.NodeToString(node.left);
 			if (leftExp.Length > 0) {
-				sb.Append('{').Append(leftExp).Append('}').Append(" ← ");
+				sb.Append('{').Append(leftExp).Append('}').Append(" <- ");
 			}
 		}
 
-		sb.Append(node.value).Append(node == this.root ? "(根)" : string.Empty);
+		sb.Append(node.value).Append(node == this.root ? "(R)" : string.Empty);
 		if (node.bucket?.Count > 0) {
 			sb.Append('*').Append(node.bucket.Count);
 		}
@@ -855,7 +872,7 @@ public class AATree<T> where T : IComparable<T> {
 		if (node != node.right) {
 			var rightExp = this.NodeToString(node.right);
 			if (rightExp.Length > 0) {
-				sb.Append(" → ").Append('{').Append(rightExp).Append('}');
+				sb.Append(" -> ").Append('{').Append(rightExp).Append('}');
 			}
 		}
 

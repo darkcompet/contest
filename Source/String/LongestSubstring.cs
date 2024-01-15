@@ -1,5 +1,5 @@
 
-public class LongestSubstringWithUniqueChars {
+public class LongestSubstring {
 	/// <summary>
 	/// Find all longest substrings such that all chars in it is unique.
 	/// Idea: Start from 0-index, just expand endIndex. If next char (nextIndex) found in [startIndex, endIndex],

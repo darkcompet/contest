@@ -7,7 +7,7 @@ namespace Compet.Contest;
 /// Ref: https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm
 /// Impl: https://www.geeksforgeeks.org/kmp-algorithm-for-pattern-searching/
 /// </summary>
-public class KMPSearch {
+public class KMP {
 	/// <summary>
 	/// </summary>
 	/// <param name="text"></param>
