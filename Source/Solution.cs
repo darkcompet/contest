@@ -571,10 +571,10 @@ public class MyNode : IComparable<MyNode> {
 
 /// <summary>
 /// Ref:
-/// https://en.wikipedia.org/wiki/AA_tree
-/// https://users.cs.fiu.edu/~weiss/dsaa_c++/code/AATree.cpp
 /// https://github.com/JuYanYan/AA-Tree/blob/master/aatree.cpp
+/// https://users.cs.fiu.edu/~weiss/dsaa_c++/code/AATree.cpp
 /// https://www.nayuki.io/res/aa-tree-set/BasicAaTreeSet.java
+/// https://en.wikipedia.org/wiki/AA_tree
 /// </summary>
 /// <typeparam name="T"></typeparam>
 public class AATree<T> where T : IComparable<T> {
@@ -625,10 +625,10 @@ public class AATree<T> where T : IComparable<T> {
 	/// </summary>
 	/// <param name="node"></param>
 	/// <param name="value"></param>
-	/// <param name="force"></param>
+	/// <param name="forceDeleteLeaf"></param>
 	/// <returns></returns>
-	private AATreeNode? Delete(AATreeNode? node, T value, bool force = false) {
-		// Console.WriteLine($"----> going to delete node: {node?.value.ToString()}, tr: {this}");
+	private AATreeNode? Delete(AATreeNode? node, T value, bool forceDeleteLeaf = false) {
+		Console.WriteLine($"----> going to delete value: {value}, go from node: {node?.value.ToString()}, tr: {this}");
 		if (node is null) {
 			return null;
 		}
@@ -636,62 +636,59 @@ public class AATree<T> where T : IComparable<T> {
 		var compare = value.CompareTo(node.value);
 		if (compare < 0) {
 			// Delete left node (we will rebalancing tree later)
-			node.left = this.Delete(node.left, value);
+			node.left = this.Delete(node.left, value, forceDeleteLeaf);
 		}
 		else if (compare > 0) {
 			// Delete right node (we will rebalancing tree later)
-			node.right = this.Delete(node.right, value);
+			node.right = this.Delete(node.right, value, forceDeleteLeaf);
 		}
 		else {
-			if (force) {
-				return node;
-			}
-			// Try remove from bucket first.
-			// -> If found node's value that equals to the value, just remove the value from bucket.
-			if (node.bucket != null && node.bucket.Remove(value)) {
-				return node;
-			}
-
-			// Not found in bucket (or bucket empty).
-			// -> Do nothing if the value does not equals to node's value.
-			if (!node.value.Equals(value)) {
-				return node;
-			}
-
-			// Given value == Node value.
-			// -> Pick any value from bucket and set to node's value.
-			if (node.bucket?.Count > 0) {
-				node.value = node.bucket.First();
-				node.bucket.Remove(node.value);
-				return node;
-			}
-
-			// Given value == Node value, and bucket is empty.
-			// -> Remove leaf node.
+			// Remove leaf node.
 			if (node.left is null && node.right is null) {
+				if (forceDeleteLeaf) {
+					return null;
+				}
+
+				// Try remove from bucket first.
+				if (node.bucket != null && node.bucket.Remove(value)) {
+					return node;
+				}
+				// Try remove value from node itself.
+				if (!node.value.Equals(value)) {
+					return node;
+				}
+
+				// Remove node value. Then set one of bucket value to node's value.
+				if (node.bucket?.Count > 0) {
+					node.value = node.bucket.First();
+					node.bucket.Remove(node.value);
+					return node;
+				}
+
 				return null;
 			}
+
 			// -> Remove successor node
 			if (node.left is null) {
 				// Successor is leaf node. Find it by go one right, then turn left until meet leaf node.
 				var successorNode = this.Successor(node);
-				// Console.WriteLine($"-------> 011. successor: {successorNode.value}, tr: {this}");
+				Console.WriteLine($"-------> 011. successor: {successorNode.value}, tr: {this}");
 				// Remove the node by overwrite successor data to it
 				node.value = successorNode.value;
 				node.bucket = successorNode.bucket;
 				node.right = this.Delete(node.right, successorNode.value, true);
-				// Console.WriteLine($"-------> 012. node: {node.value}, tr: {this}");
+				Console.WriteLine($"-------> 012. node: {node.value}, tr: {this}");
 			}
 			// -> Remove predecessor node
 			else {
 				// Predecessor is leaf node. Find it by go one left, then turn right until meet leaf node.
 				var predecessorNode = this.Predecessor(node);
-				// Console.WriteLine($"-------> 021. predecessor: {predecessorNode.value}, tr: {this}");
+				Console.WriteLine($"-------> 021. predecessor: {predecessorNode.value}, tr: {this}");
 				// Remove the node by overwrite predecessor data to it
 				node.value = predecessorNode.value;
 				node.bucket = predecessorNode.bucket;
 				node.left = this.Delete(node.left, predecessorNode.value, true);
-				// Console.WriteLine($"-------> 022. node: {node.value}, tr: {this}");
+				Console.WriteLine($"-------> 022. node: {node.value}, tr: {this}");
 			}
 		}
 
