@@ -4,6 +4,7 @@ namespace Compet.Datastructure;
 /// This is known as Union-Find.
 /// Ref:
 /// https://cp-algorithms.com/data_structures/disjoint_set_union.html
+/// https://www.geeksforgeeks.org/disjoint-set-data-structures/
 /// </summary>
 public class DisjoinSet {
 	/// <summary>
@@ -14,7 +15,7 @@ public class DisjoinSet {
 	/// <summary>
 	/// Opt: compress path.
 	/// </summary>
-	private readonly int[] parent;
+	private readonly int[] set;
 
 	/// <summary>
 	/// Opt: when merge 2 sets.
@@ -23,18 +24,20 @@ public class DisjoinSet {
 
 	public DisjoinSet(int elementCount) {
 		this.N = elementCount;
-		this.parent = new int[elementCount];
+		var set = this.set = new int[elementCount];
 		this.rank = new int[elementCount];
 
-		Array.Fill(this.parent, -1);
+		for (var v = 0; v < elementCount; ++v) {
+			set[v] = v;
+		}
 	}
 
 	/// <summary>
 	/// Merge 2 sets that contains given u, v.
 	/// This is known as union action.
 	/// </summary>
-	/// <param name="u">Index of element 1 (must smaller than N)</param>
-	/// <param name="v">Index of element 2 (must smaller than N)</param>
+	/// <param name="u">Element 1 (must smaller than N)</param>
+	/// <param name="v">Element 2 (must smaller than N)</param>
 	public void MergeSets(int u, int v) {
 		var s1 = this.FindSet(u);
 		var s2 = this.FindSet(v);
@@ -44,7 +47,7 @@ public class DisjoinSet {
 			if (rank[u] > rank[v]) {
 				(u, v) = (v, u);
 			}
-			this.parent[u] = v;
+			this.set[u] = v;
 			if (rank[v] == rank[u]) {
 				++rank[v];
 			}
@@ -52,16 +55,16 @@ public class DisjoinSet {
 	}
 
 	/// <summary>
-	/// Find index of set that hold the value.
+	/// Find index of set that contains the value.
 	/// </summary>
-	/// <param name="v">Index to find its set (must smaller than N)</param>
+	/// <param name="v">Find the set that element belongs to (must smaller than N)</param>
 	/// <returns>Index of set that contains the element</returns>
 	public int FindSet(int v) {
-		var parent = this.parent;
-		if (v == parent[v]) {
+		var set = this.set;
+		if (set[v] == v) {
 			return v;
 		}
 		// Opt: Compress path by remember highest parent of the element.
-		return parent[v] = this.FindSet(parent[v]);
+		return set[v] = this.FindSet(set[v]);
 	}
 }
