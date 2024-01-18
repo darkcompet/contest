@@ -1,3 +1,4 @@
+namespace Compet.Algorithm;
 
 public class LongestSubstring {
 	/// <summary>

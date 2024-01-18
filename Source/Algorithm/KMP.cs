@@ -1,4 +1,4 @@
-namespace Compet.Contest;
+namespace Compet.Algorithm;
 
 /// <summary>
 /// Knuth–Morris–Pratt algorithm to find all pattern (M) in given text (N).

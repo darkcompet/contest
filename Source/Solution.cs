@@ -20,8 +20,8 @@ public abstract class BaseSolution {
 
 	/// White space chars: space, tab, linefeed
 	private const int WHITE_SPACE_CODE = 32;
-	private const int IN_BUFFER_SIZE = 1 << 13;
-	private const int OUT_BUFFER_SIZE = 1 << 13;
+	private const int IN_BUFFER_SIZE = 1 << 14;
+	private const int OUT_BUFFER_SIZE = 1 << 14;
 
 	private Stream inStream;
 	private Stream outStream;
@@ -33,8 +33,8 @@ public abstract class BaseSolution {
 	private byte[] outChars;
 	private int nextWriteByteIndex;
 
-	/// To store bytes of int, long values when write to out-buffer
-	private readonly byte[] scratchBytes = new byte[32];
+	/// To store chars of int, long (9223372036854775807) when write to out-buffer
+	private readonly byte[] scratchBytes = new byte[19];
 
 	public BaseSolution() {
 		// Before dotnet 6, we should use Path.GetFileName() instead.
@@ -497,401 +497,34 @@ public abstract class BaseSolution {
 
 /// Run: dotnet run
 public class Solution : BaseSolution {
-	// public static void Main(params string[] args) {
-	// 	var sol = new Solution();
-	// 	sol.inputFromFile = sol.isDebug;
-	// 	sol.Start();
-	// }
+	public static void Main(params string[] args) {
+		var sol = new Solution();
+		sol.inputFromFile = sol.isDebug;
+		sol.Start();
+	}
 
-	// protected override void Solve() {
-	// 	this.debugln("ans: " + string.Join(", ", this.LexicographicallySmallestArray(new int[] { 1,7,6,18,2,1 }, 3)));
-	// }
+	protected override void Solve() {
+		var arr = ns().Split(',').Select(int.Parse).ToArray();
+		var limit = ni();
+		this.debugln("ans: " + string.Join(", ", this.LexicographicallySmallestArray(arr, limit)));
+	}
 
 	public int[] LexicographicallySmallestArray(int[] nums, int limit) {
 		var N = nums.Length;
 
-		var tr = new AATree<MyNode>();
 		var nodes = new MyNode[N];
 		for (var index = 0; index < N; ++index) {
 			var node = nodes[index] = new MyNode() {
 				num = nums[index],
 				index = index
 			};
-			tr.Add(node);
 		}
-		// this.debugln($"tr: {tr}");
 
 		for (var index = 0; index < N; ++index) {
 			var node = nodes[index];
-			var swapNode = this.FindSwapNode(tr, node, limit);
-
-			if (swapNode is null) {
-				tr.Remove(node);
-				// this.debugln($"---> Do not swap for node {node.num}({node.index}), tr: {tr}");
-				continue;
-			}
-
-			(nums[index], nums[swapNode.index]) = (nums[swapNode.index], nums[index]);
-
-			(nodes[index], nodes[swapNode.index]) = (nodes[swapNode.index], nodes[index]);
-			(nodes[swapNode.index].index, nodes[index].index) = (nodes[index].index, nodes[swapNode.index].index);
-
-			tr.Remove(swapNode);
-
-			// this.debugln($"---> Swapped node {node.num}({node.index}) vs {swapNode.num}({swapNode.index}), nums: {string.Join(", ", nums)}, tr: {tr}");
 		}
 
 		return nums;
-	}
-
-	private readonly MyNode lowerMyNode = new();
-	private MyNode? FindSwapNode(AATree<MyNode> tr, MyNode node, int limit) {
-		MyNode? bestNode = null;
-		var curNode = node;
-		var count = 0;
-		while (true) {
-			++count;
-			// num - target <= limit
-			// target >= num - limit
-			this.lowerMyNode.num = curNode.num - limit;
-			if (!tr.Lowerbound(this.lowerMyNode, out var resultNode) || resultNode!.num >= curNode.num) {
-				this.debugln($"---> count: {count}");
-				return bestNode;
-			}
-			// this.debugln($"2.{count} lowerbound of {curNode.num}-{limit} is {resultNode.num}({resultNode.index})");
-			bestNode = resultNode;
-			curNode = resultNode;
-		}
-	}
-}
-
-
-/// <summary>
-/// Ref:
-/// https://github.com/JuYanYan/AA-Tree/blob/master/aatree.cpp
-/// https://users.cs.fiu.edu/~weiss/dsaa_c++/code/AATree.cpp
-/// https://www.nayuki.io/res/aa-tree-set/BasicAaTreeSet.java
-/// https://en.wikipedia.org/wiki/AA_tree
-/// </summary>
-/// <typeparam name="T"></typeparam>
-public class AATree<T> where T : IComparable<T> {
-	private AATreeNode? root;
-
-	public AATree() {
-	}
-
-	public void Add(T value) {
-		this.root = this.Insert(this.root, value);
-	}
-
-	private AATreeNode Insert(AATreeNode? node, T value) {
-		if (node is null) {
-			return new AATreeNode(value, null, null);
-		}
-
-		var compare = value.CompareTo(node.value);
-		if (compare == 0) {
-			// Add to bucket for value that equals to this node's value but different instance.
-			if (!value.Equals(node.value)) {
-				node.bucket ??= new();
-				node.bucket.Add(value);
-			}
-			return node;
-		}
-
-		if (compare < 0) {
-			node.left = this.Insert(node.left, value);
-		}
-		else {
-			node.right = this.Insert(node.right, value);
-		}
-
-		node = this.Skew(node);
-		node = this.Split(node);
-
-		return node;
-	}
-
-	public bool Remove(T value) {
-		this.root = this.Delete(this.root, value);
-		return this.root != null;
-	}
-
-	/// <summary>
-	/// https://en.wikipedia.org/wiki/AA_tree
-	/// </summary>
-	/// <param name="node"></param>
-	/// <param name="value"></param>
-	/// <param name="forceDeleteLeaf"></param>
-	/// <returns></returns>
-	private AATreeNode? Delete(AATreeNode? node, T value, bool forceDeleteLeaf = false) {
-		if (node is null) {
-			return null;
-		}
-
-		var compare = value.CompareTo(node.value);
-		if (compare < 0) {
-			// Delete left node (we will rebalancing tree later)
-			node.left = this.Delete(node.left, value, forceDeleteLeaf);
-		}
-		else if (compare > 0) {
-			// Delete right node (we will rebalancing tree later)
-			node.right = this.Delete(node.right, value, forceDeleteLeaf);
-		}
-		else {
-			if (!forceDeleteLeaf) {
-				// Try remove from bucket first.
-				if (node.bucket != null && node.bucket.Remove(value)) {
-					return node;
-				}
-				// Try remove value from node itself.
-				if (!node.value.Equals(value)) {
-					return node;
-				}
-
-				// Remove node value. Then bring one of bucket value to node's value.
-				if (node.bucket?.Count > 0) {
-					node.value = node.bucket.First();
-					node.bucket.Remove(node.value);
-					return node;
-				}
-			}
-
-			// Remove leaf node.
-			if (node.left is null && node.right is null) {
-				return null;
-			}
-
-			// -> Remove successor node
-			if (node.left is null) {
-				// Successor is leaf node. Find it by go one right, then turn left until meet leaf node.
-				var successorNode = this.Successor(node);
-				// Console.WriteLine($"-------> 011. successor of node {node.value} is {successorNode.value}, tr: {this}");
-				// Remove the node by overwrite successor data to it
-				node.value = successorNode.value;
-				node.bucket = successorNode.bucket;
-				node.right = this.Delete(node.right, successorNode.value, true);
-				// Console.WriteLine($"-------> 012. node: {node.value}, tr: {this}");
-			}
-			// -> Remove predecessor node
-			else {
-				// Predecessor is leaf node. Find it by go one left, then turn right until meet leaf node.
-				var predecessorNode = this.Predecessor(node);
-				// Console.WriteLine($"-------> 021. predecessor of node {node.value} is {predecessorNode.value}, tr: {this}");
-				// Remove the node by overwrite predecessor data to it
-				node.value = predecessorNode.value;
-				node.bucket = predecessorNode.bucket;
-				node.left = this.Delete(node.left, predecessorNode.value, true);
-				// Console.WriteLine($"-------> 022. node: {node.value}, tr: {this}");
-			}
-		}
-
-		// Console.WriteLine($"-------> 1. tr: {this}");
-		node = this.DecreaseLevel(node);
-		// Console.WriteLine($"-------> 2. tr: {this}");
-		node = this.Skew(node);
-		// Console.WriteLine($"-------> 3. tr: {this}");
-
-		if (node.right != null) {
-			node.right = this.Skew(node.right);
-			// Console.WriteLine($"-------> 4. tr: {this}");
-
-			if (node.right.right != null) {
-				node.right.right = this.Skew(node.right.right);
-				// Console.WriteLine($"-------> 5. tr: {this}");
-			}
-		}
-
-		node = this.Split(node);
-		// Console.WriteLine($"-------> 6. tr: {this}");
-		if (node.right != null) {
-			node.right = this.Split(node.right);
-			// Console.WriteLine($"-------> 7. tr: {this}");
-		}
-
-		return node;
-	}
-
-	private AATreeNode DecreaseLevel(AATreeNode node) {
-		if (node.left != null && node.right != null) {
-			var shouldBeLevel = Math.Min(node.left.level, node.right.level) + 1;
-			if (node.level > shouldBeLevel) {
-				node.level = shouldBeLevel;
-				if (node.right != null && node.right.level > shouldBeLevel) {
-					node.right.level = shouldBeLevel;
-				}
-			}
-		}
-		return node;
-	}
-
-	private AATreeNode Predecessor(AATreeNode curNode) {
-		curNode = curNode.left!;
-		while (curNode.right != null) {
-			curNode = curNode.right;
-		}
-		return curNode;
-	}
-
-	private AATreeNode Successor(AATreeNode curNode) {
-		curNode = curNode.right!;
-		while (curNode.left != null) {
-			curNode = curNode.left;
-		}
-		return curNode;
-	}
-
-	private AATreeNode Skew(AATreeNode node) {
-		if (node.left != null) {
-			// Rotate right
-			if (node.level == node.left.level) {
-				var left = node.left;
-				node.left = left.right;
-				left.right = node;
-
-				return left;
-			}
-		}
-		return node;
-	}
-
-	private AATreeNode Split(AATreeNode node) {
-		if (node.right?.right != null) {
-			// Rotate left
-			if (node.right.right.level == node.level) {
-				var right = node.right;
-				node.right = right.left;
-				right.left = node;
-				++right.level;
-
-				return right;
-			}
-		}
-		return node;
-	}
-
-	private AATreeNode? Search(AATreeNode? node, T value) {
-		if (node is null) {
-			return null;
-		}
-		var compare = value.CompareTo(node.value);
-		if (compare < 0) {
-			return this.Search(node.left, value);
-		}
-		if (compare > 0) {
-			return this.Search(node.right, value);
-		}
-
-		return (node.value.Equals(value) || (node.bucket != null && node.bucket.Contains(value))) ? node : null;
-	}
-
-	public T FindMin() {
-		if (this.root is null) {
-			throw new Exception("Empty tree");
-		}
-		//TODO impl
-		return default;
-	}
-
-	public T FindMax() {
-		if (this.root is null) {
-			throw new Exception("Empty tree");
-		}
-		//TODO impl
-		return default;
-	}
-
-	public bool IsEmpty() {
-		return this.root is null;
-	}
-
-	public bool Lowerbound(T value, out T? result) {
-		return Lowerbound(this.root, value, out result);
-	}
-
-	private static bool Lowerbound(AATreeNode? node, T value, out T? result) {
-		if (node is null) {
-			result = default;
-			return false;
-		}
-
-		var compare = value.CompareTo(node.value);
-
-		// Node value > the value
-		// -> Find at left subtree to get smaller value
-		if (compare < 0) {
-			if (Lowerbound(node.left, value, out result)) {
-				return true;
-			}
-			result = node.value;
-			return true;
-		}
-
-		// Node value < the value
-		// -> Find at right subtree to get bigger value
-		if (compare > 0) {
-			if (Lowerbound(node.right, value, out result)) {
-				return true;
-			}
-			result = default;
-			return false;
-		}
-
-		result = node.value;
-		return true;
-	}
-
-	private string NodeToString(AATreeNode? node) {
-		if (node is null) {
-			return string.Empty;
-		}
-
-		var sb = new System.Text.StringBuilder();
-
-		if (node != node.left) {
-			var leftExp = this.NodeToString(node.left);
-			if (leftExp.Length > 0) {
-				sb.Append('{').Append(leftExp).Append('}').Append(" <- ");
-			}
-		}
-
-		sb.Append(node.value).Append(node == this.root ? "(R)" : string.Empty);
-		if (node.bucket?.Count > 0) {
-			sb.Append('*').Append(node.bucket.Count);
-		}
-
-		if (node != node.right) {
-			var rightExp = this.NodeToString(node.right);
-			if (rightExp.Length > 0) {
-				sb.Append(" -> ").Append('{').Append(rightExp).Append('}');
-			}
-		}
-
-		return sb.ToString();
-	}
-
-	public override string ToString() {
-		return this.NodeToString(this.root);
-	}
-
-	internal class AATreeNode {
-		// User data
-		public T value;
-
-		// Node internal data
-		internal int level;
-		internal AATreeNode? left;
-		internal AATreeNode? right;
-
-		internal HashSet<T>? bucket;
-
-		// constuctor for regular nodes (that all start life as leaf nodes)
-		internal AATreeNode(T value, AATreeNode? left, AATreeNode? right) {
-			this.left = left;
-			this.right = right;
-			this.value = value;
-			this.level = 1;
-		}
 	}
 }
 

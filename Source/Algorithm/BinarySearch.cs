@@ -1,4 +1,4 @@
-namespace Compet.Contest;
+namespace Compet.Algorithm;
 
 public class BinarySearch {
 	/// <summary>
