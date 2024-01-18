@@ -42,7 +42,13 @@ public abstract class BaseSolution {
 		this.isDebug = System.IO.Path.GetFileName("local.proof") != null;
 	}
 
+	private long startTimeMillis;
+
 	protected void Start() {
+		if (this.isDebug) {
+			this.startTimeMillis = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+		}
+
 		// Init IO
 		this.inStream = this.inputFromFile ?
 			new FileStream(Path.GetFullPath("Data/in.txt"), FileMode.Open, FileAccess.Read, FileShare.ReadWrite) :
@@ -63,6 +69,10 @@ public abstract class BaseSolution {
 		// Close IO stream
 		this.inStream.Close();
 		this.outStream.Close();
+
+		if (this.isDebug) {
+			Console.WriteLine($"Elapsed: {DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - this.startTimeMillis} ms");
+		}
 	}
 
 	public int ni() {
@@ -494,7 +504,7 @@ public class Solution : BaseSolution {
 	// }
 
 	// protected override void Solve() {
-	// 	this.debugln("ans: " + string.Join(", ", this.LexicographicallySmallestArray(new int[] { 59, 24, 38, 8, 92, 78, 7, 95, 73, 7 }, 10)));
+	// 	this.debugln("ans: " + string.Join(", ", this.LexicographicallySmallestArray(new int[] { 1,7,6,18,2,1 }, 3)));
 	// }
 
 	public int[] LexicographicallySmallestArray(int[] nums, int limit) {
@@ -509,7 +519,7 @@ public class Solution : BaseSolution {
 			};
 			tr.Add(node);
 		}
-		this.debugln($"tr: {tr}");
+		// this.debugln($"tr: {tr}");
 
 		for (var index = 0; index < N; ++index) {
 			var node = nodes[index];
@@ -517,7 +527,7 @@ public class Solution : BaseSolution {
 
 			if (swapNode is null) {
 				tr.Remove(node);
-				this.debugln($"---> Do not swap for node {node.num}({node.index}), tr: {tr}");
+				// this.debugln($"---> Do not swap for node {node.num}({node.index}), tr: {tr}");
 				continue;
 			}
 
@@ -528,7 +538,7 @@ public class Solution : BaseSolution {
 
 			tr.Remove(swapNode);
 
-			this.debugln($"---> Swapped node {node.num}({node.index}) vs {swapNode.num}({swapNode.index}), nums: {string.Join(", ", nums)}, tr: {tr}");
+			// this.debugln($"---> Swapped node {node.num}({node.index}) vs {swapNode.num}({swapNode.index}), nums: {string.Join(", ", nums)}, tr: {tr}");
 		}
 
 		return nums;
@@ -545,26 +555,13 @@ public class Solution : BaseSolution {
 			// target >= num - limit
 			this.lowerMyNode.num = curNode.num - limit;
 			if (!tr.Lowerbound(this.lowerMyNode, out var resultNode) || resultNode!.num >= curNode.num) {
-				this.debugln($"1.{count} lowerbound of {curNode.num}-{limit} is {resultNode?.num}({resultNode?.index})");
+				this.debugln($"---> count: {count}");
 				return bestNode;
 			}
-			this.debugln($"2.{count} lowerbound of {curNode.num}-{limit} is {resultNode.num}({resultNode.index})");
+			// this.debugln($"2.{count} lowerbound of {curNode.num}-{limit} is {resultNode.num}({resultNode.index})");
 			bestNode = resultNode;
 			curNode = resultNode;
 		}
-	}
-}
-
-public class MyNode : IComparable<MyNode> {
-	public int num;
-	public int index;
-
-	public int CompareTo(MyNode that) {
-		return this.num - that.num;
-	}
-
-	public override string ToString() {
-		return this.num + string.Empty;
 	}
 }
 
@@ -628,7 +625,6 @@ public class AATree<T> where T : IComparable<T> {
 	/// <param name="forceDeleteLeaf"></param>
 	/// <returns></returns>
 	private AATreeNode? Delete(AATreeNode? node, T value, bool forceDeleteLeaf = false) {
-		Console.WriteLine($"----> going to delete value: {value}, go from node: {node?.value.ToString()}, tr: {this}");
 		if (node is null) {
 			return null;
 		}
@@ -643,12 +639,7 @@ public class AATree<T> where T : IComparable<T> {
 			node.right = this.Delete(node.right, value, forceDeleteLeaf);
 		}
 		else {
-			// Remove leaf node.
-			if (node.left is null && node.right is null) {
-				if (forceDeleteLeaf) {
-					return null;
-				}
-
+			if (!forceDeleteLeaf) {
 				// Try remove from bucket first.
 				if (node.bucket != null && node.bucket.Remove(value)) {
 					return node;
@@ -658,13 +649,16 @@ public class AATree<T> where T : IComparable<T> {
 					return node;
 				}
 
-				// Remove node value. Then set one of bucket value to node's value.
+				// Remove node value. Then bring one of bucket value to node's value.
 				if (node.bucket?.Count > 0) {
 					node.value = node.bucket.First();
 					node.bucket.Remove(node.value);
 					return node;
 				}
+			}
 
+			// Remove leaf node.
+			if (node.left is null && node.right is null) {
 				return null;
 			}
 
@@ -672,23 +666,23 @@ public class AATree<T> where T : IComparable<T> {
 			if (node.left is null) {
 				// Successor is leaf node. Find it by go one right, then turn left until meet leaf node.
 				var successorNode = this.Successor(node);
-				Console.WriteLine($"-------> 011. successor: {successorNode.value}, tr: {this}");
+				// Console.WriteLine($"-------> 011. successor of node {node.value} is {successorNode.value}, tr: {this}");
 				// Remove the node by overwrite successor data to it
 				node.value = successorNode.value;
 				node.bucket = successorNode.bucket;
 				node.right = this.Delete(node.right, successorNode.value, true);
-				Console.WriteLine($"-------> 012. node: {node.value}, tr: {this}");
+				// Console.WriteLine($"-------> 012. node: {node.value}, tr: {this}");
 			}
 			// -> Remove predecessor node
 			else {
 				// Predecessor is leaf node. Find it by go one left, then turn right until meet leaf node.
 				var predecessorNode = this.Predecessor(node);
-				Console.WriteLine($"-------> 021. predecessor: {predecessorNode.value}, tr: {this}");
+				// Console.WriteLine($"-------> 021. predecessor of node {node.value} is {predecessorNode.value}, tr: {this}");
 				// Remove the node by overwrite predecessor data to it
 				node.value = predecessorNode.value;
 				node.bucket = predecessorNode.bucket;
 				node.left = this.Delete(node.left, predecessorNode.value, true);
-				Console.WriteLine($"-------> 022. node: {node.value}, tr: {this}");
+				// Console.WriteLine($"-------> 022. node: {node.value}, tr: {this}");
 			}
 		}
 
@@ -898,5 +892,18 @@ public class AATree<T> where T : IComparable<T> {
 			this.value = value;
 			this.level = 1;
 		}
+	}
+}
+
+public class MyNode : IComparable<MyNode> {
+	public int num;
+	public int index;
+
+	public int CompareTo(MyNode that) {
+		return this.num - that.num;
+	}
+
+	public override string ToString() {
+		return this.num + string.Empty;
 	}
 }
