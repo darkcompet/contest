@@ -1,11 +1,11 @@
-() https://leetcode.com/contest/weekly-contest-380
+(1,2,,4) https://leetcode.com/contest/weekly-contest-380
 () https://leetcode.com/contest/weekly-contest-379
 () https://leetcode.com/contest/weekly-contest-378
 () https://leetcode.com/contest/weekly-contest-377
 () https://leetcode.com/contest/weekly-contest-376
 () https://leetcode.com/contest/weekly-contest-375
 () https://leetcode.com/contest/weekly-contest-374
-(1,2,) https://leetcode.com/contest/weekly-contest-373
+(1,2,3) https://leetcode.com/contest/weekly-contest-373
 () https://leetcode.com/contest/weekly-contest-372
 () https://leetcode.com/contest/weekly-contest-371
 () https://leetcode.com/contest/weekly-contest-370

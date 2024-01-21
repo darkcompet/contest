@@ -495,97 +495,6 @@ public abstract class BaseSolution {
 	}
 }
 
-public class DisjoinSet {
-	/// <summary>
-	/// Element count.
-	/// </summary>
-	private readonly int N;
-
-	/// <summary>
-	/// Opt: compress path.
-	/// </summary>
-	private readonly int[] set;
-
-	private readonly List<int>[] subtree;
-
-	/// <summary>
-	/// Opt: when merge 2 sets.
-	/// </summary>
-	private readonly int[] rank;
-
-	public DisjoinSet(int elementCount) {
-		this.N = elementCount;
-		var set = this.set = new int[elementCount];
-		var subtree = this.subtree = new List<int>[elementCount];
-		this.rank = new int[elementCount];
-
-		// Add default set for each element
-		for (var v = 0; v < elementCount; ++v) {
-			set[v] = v;
-			subtree[v] = new() { v };
-		}
-	}
-
-	public void AddSet(int v) {
-		this.set[v] = v;
-	}
-
-	/// <summary>
-	/// Merge 2 sets that contains given u, v.
-	/// This is known as union action.
-	/// </summary>
-	/// <param name="u">Element 1 (must smaller than N)</param>
-	/// <param name="v">Element 2 (must smaller than N)</param>
-	public void MergeSets(int u, int v) {
-		var u_s = this.FindSet(u);
-		var v_s = this.FindSet(v);
-		if (u_s != v_s) {
-			// Opt: Only attach lower rank node to higher rank node to make tree height small as possible.
-			var rank = this.rank;
-			if (rank[u] > rank[v]) {
-				(u, v) = (v, u);
-			}
-			this.set[u] = v;
-			this.subtree[v_s].AddRange(this.subtree[u_s]);
-			this.subtree[u_s].Clear();
-			if (rank[v] == rank[u]) {
-				++rank[v];
-			}
-		}
-	}
-
-	/// <summary>
-	/// Find index of set (element, parent) that contains the value.
-	/// </summary>
-	/// <param name="v">Find the set that element belongs to (must smaller than N)</param>
-	/// <returns>Index of set that contains the element</returns>
-	public int FindSet(int v) {
-		var set = this.set;
-		if (set[v] == v) {
-			return v;
-		}
-		// Opt: Compress path by remember highest parent of the element.
-		return set[v] = this.FindSet(set[v]);
-	}
-
-	public List<int> GetSubtree(int v) {
-		return this.subtree[v];
-	}
-}
-
-public class MyNode : IComparable<MyNode> {
-	public int num;
-	public int v;
-
-	public int CompareTo(MyNode that) {
-		return this.num - that.num;
-	}
-
-	public override string ToString() {
-		return this.num + string.Empty;
-	}
-}
-
 /// Run: dotnet run
 public class Solution : BaseSolution {
 	// public static void Main(params string[] args) {
@@ -595,56 +504,80 @@ public class Solution : BaseSolution {
 	// }
 
 	// protected override void Solve() {
-	// 	var arr = ns().Split(',').Select(int.Parse).ToArray();
-	// 	var limit = ni();
-	// 	this.debugln("ans: " + string.Join(", ", this.LexicographicallySmallestArray(arr, limit)));
 	// }
 
-	public int[] LexicographicallySmallestArray(int[] nums, int limit) {
-		var N = nums.Length;
+	public int[] CountOfPairs(int N, int x, int y) {
+		--x;
+		--y;
+		var g = new int[N][];
+		cacheDist = new int[N][];
+		tmpDist = new int[N];
+		tmpVisited = new bool[N];
 
-		var originNodes = new MyNode[N];
-		var nodes = new MyNode[N];
 		for (var index = 0; index < N; ++index) {
-			originNodes[index] = nodes[index] = new MyNode() {
-				num = nums[index],
-				v = index
-			};
+			g[index] = new int[N];
+			cacheDist[index] = new int[N];
+			Array.Fill(cacheDist[index], -1);
+		}
+		for (var index = 0; index + 1 < N; ++index) {
+			g[index][index + 1] = g[index + 1][index] = 1;
+		}
+		g[x][y] = g[y][x] = 1;
+
+		var pair = new int[N];
+		for (var k = 1; k <= N; ++k) {
+			var count = 0;
+			for (var u = 0; u < N; ++u) {
+				for (var v = 0; v < N; ++v) {
+					if (Math.Abs(CalcDist(g, u, v)) == k) {
+						++count;
+					}
+				}
+			}
+			pair[k - 1] = count;
 		}
 
-		Array.Sort(nodes, (a, b) => { return a.num - b.num; });
+		return pair;
+	}
 
-		var ds = new DisjoinSet(N);
-		for (var index = 1; index < N; ++index) {
-			var node = nodes[index];
-			if (nodes[index].num - nodes[index - 1].num <= limit) {
-				ds.MergeSets(nodes[index].v, nodes[index - 1].v);
+	int[][] cacheDist;
+	int[] tmpDist;
+	Queue<int> Q = new();
+	bool[] tmpVisited;
+
+	int CalcDist(int[][] g, int _u, int _v) {
+		if (cacheDist[_u][_v] != -1) {
+			return cacheDist[_u][_v];
+		}
+
+		var N = g.Length;
+		var INF = N + 100;
+
+		Array.Fill(tmpDist, INF);
+		Array.Fill(tmpVisited, false);
+		tmpDist[_u] = 0;
+
+		Q.Clear();
+		Q.Enqueue(_u);
+		tmpVisited[_u] = true;
+
+		while (Q.Count > 0) {
+			var u = Q.Dequeue();
+
+			for (var v = 0; v < N; ++v) {
+				if (!tmpVisited[v] && g[u][v] == 1) {
+					tmpVisited[v] = true;
+					tmpDist[v] = Math.Min(tmpDist[u] + 1, tmpDist[v]);
+					Q.Enqueue(v);
+
+					if (v == _v) {
+						Q.Clear();
+						break;
+					}
+				}
 			}
 		}
 
-		var ans = new int[N];
-		var handled = new bool[N];
-		foreach (var node in originNodes) {
-			var root = ds.FindSet(node.v);
-			if (!handled[root]) {
-				handled[root] = true;
-
-				var indices = ds.GetSubtree(root);
-				indices.Sort();
-
-				var values = new List<int>();
-				foreach (var v in indices) {
-					values.Add(originNodes[v].num);
-				}
-				values.Sort((a, b) => b - a);
-
-				foreach (var v in indices) {
-					ans[v] = values[values.Count - 1];
-					values.RemoveAt(values.Count - 1);
-				}
-			}
-		}
-
-		return ans;
+		return cacheDist[_u][_v] = cacheDist[_v][_u] = tmpDist[_v];
 	}
 }
