@@ -26,11 +26,11 @@ public abstract class BaseSolution {
 	private Stream inStream;
 	private Stream outStream;
 
-	private byte[] inBuffer;
+	private byte[] inBytes;
 	private int nextReadByteIndex;
 	private int readByteCount;
 
-	private byte[] outChars;
+	private byte[] outBytes;
 	private int nextWriteByteIndex;
 
 	/// To store chars of int, long (9223372036854775807) when write to out-buffer
@@ -39,7 +39,7 @@ public abstract class BaseSolution {
 	public BaseSolution() {
 		// Before dotnet 6, we should use Path.GetFileName() instead.
 		// From dotnet 7, we can use Path.Exists() to test the file.
-		this.isDebug = System.IO.Path.GetFileName("local.proof") != null;
+		this.isDebug = this.inputFromFile = System.IO.Path.GetFileName("local.proof") != null;
 	}
 
 	private long startTimeMillis;
@@ -58,8 +58,8 @@ public abstract class BaseSolution {
 			new FileStream(Path.GetFullPath("Data/out.txt"), FileMode.Open, FileAccess.Write, FileShare.ReadWrite) :
 			Console.OpenStandardOutput();
 
-		this.inBuffer = new byte[IN_BUFFER_SIZE];
-		this.outChars = new byte[OUT_BUFFER_SIZE];
+		this.inBytes = new byte[IN_BUFFER_SIZE];
+		this.outBytes = new byte[OUT_BUFFER_SIZE];
 
 		this.Solve();
 
@@ -355,7 +355,7 @@ public abstract class BaseSolution {
 		if (this.nextWriteByteIndex >= OUT_BUFFER_SIZE) {
 			this.FlushOutBuffer();
 		}
-		this.outChars[this.nextWriteByteIndex++] = ch;
+		this.outBytes[this.nextWriteByteIndex++] = ch;
 	}
 
 	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -363,7 +363,7 @@ public abstract class BaseSolution {
 		if (this.nextWriteByteIndex + count >= OUT_BUFFER_SIZE) {
 			this.FlushOutBuffer();
 		}
-		Array.Copy(arr, fromIndex, this.outChars, this.nextWriteByteIndex, count);
+		Array.Copy(arr, fromIndex, this.outBytes, this.nextWriteByteIndex, count);
 		this.nextWriteByteIndex += count;
 	}
 
@@ -434,7 +434,7 @@ public abstract class BaseSolution {
 
 	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	protected void FlushOutBuffer() {
-		this.outStream.Write(this.outChars, 0, this.nextWriteByteIndex);
+		this.outStream.Write(this.outBytes, 0, this.nextWriteByteIndex);
 		this.outStream.Flush();
 		this.nextWriteByteIndex = 0;
 	}
@@ -442,7 +442,7 @@ public abstract class BaseSolution {
 	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	private bool _TryReadNextByte(out byte result) {
 		if (this.nextReadByteIndex >= this.readByteCount) {
-			this.readByteCount = this.inStream.Read(this.inBuffer, 0, IN_BUFFER_SIZE);
+			this.readByteCount = this.inStream.Read(this.inBytes, 0, IN_BUFFER_SIZE);
 			this.nextReadByteIndex = 0;
 
 			if (this.readByteCount <= 0) {
@@ -450,7 +450,7 @@ public abstract class BaseSolution {
 				return false;
 			}
 		}
-		result = this.inBuffer[this.nextReadByteIndex++];
+		result = this.inBytes[this.nextReadByteIndex++];
 		return true;
 	}
 
@@ -497,12 +497,10 @@ public abstract class BaseSolution {
 
 /// Run: dotnet run
 public class Solution : BaseSolution {
-	// public static void Main(params string[] args) {
-	// 	var sol = new Solution();
-	// 	sol.inputFromFile = sol.isDebug;
-	// 	sol.Start();
-	// }
+	public static void Main(params string[] args) {
+		new Solution().Start();
+	}
 
-	// protected override void Solve() {
-	// }
+	protected override void Solve() {
+	}
 }
