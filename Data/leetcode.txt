@@ -379,12 +379,11 @@
 () https://leetcode.com/contest/weekly-contest-3
 () https://leetcode.com/contest/weekly-contest-2
 () https://leetcode.com/contest/weekly-contest-1
-contest/weekly-contest-8/ ()
-https://leetcode.com/contest/weekly-contest-7/ ()
-https://leetcode.com/contest/weekly-contest-6/ ()
-https://leetcode.com/contest/weekly-contest-5/ ()
-https://leetcode.com/contest/weekly-contest-4/ ()
-https://leetcode.com/contest/weekly-contest-3/ ()
-https://leetcode.com/contest/weekly-contest-2/ ()
-https://leetcode.com/contest/weekly-contest-1/ ()
-
+() https://leetcode.com/contest/weekly-contest-7
+() https://leetcode.com/contest/weekly-contest-6
+() https://leetcode.com/contest/weekly-contest-5
+() https://leetcode.com/contest/weekly-contest-4
+() https://leetcode.com/contest/weekly-contest-3
+() https://leetcode.com/contest/weekly-contest-2
+() https://leetcode.com/contest/weekly-contest-1
+(,2,3) https://leetcode.com/contest/warm-up-contest
