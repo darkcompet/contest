@@ -505,27 +505,36 @@ public class Solution : BaseSolution {
 	// 	LengthLongestPath("dir\n\tsubdir1\n\t\tfile1.ext\n\t\tsubsubdir1\n\tsubdir2\n\t\tsubsubdir2\n\t\t\tfile2.ext");
 	// }
 
-	public IList<int> LexicalOrder(int n) {
-		var ans = new List<int>();
-		for (var index = 1; index <= n; ++index) {
-			ans.Add(index);
-		}
-		ans.Sort((a, b) => {
-			var ch_a = new int[11];
-			var ch_b = new int[11];
-			for (var index = 10; index >= 0; --index) {
-				ch_a[index] = a % 10;
-				ch_b[index] = b % 10;
-				a /= 10;
-				b /= 10;
+	public IList<int> LexicalOrder(int N) {
+		var nums = new List<int>[N];
+		for (var index = 0; index < N; ++index) {
+			var list = new List<int>();
+			var num = index + 1;
+			while (num > 0) {
+				list.Insert(0, num % 10);
+				num /= 10;
 			}
-			for (var index = 0; index < 11; ++index) {
-				if (ch_a[index] != ch_b[index]) {
-					return -ch_a[index] + ch_b[index];
+			nums[index] = list;
+		}
+
+		Array.Sort(nums, (a, b) => {
+			for (var index = 0; index < Math.Min(a.Count, b.Count); ++index) {
+				if (a[index] < b[index]) {
+					return -1;
 				}
+				else if (a[index] > b[index]) {
+					return 1;
+				}
+			}
+			if (a.Count < b.Count) {
+				return -1;
+			}
+			if (a.Count > b.Count) {
+				return 1;
 			}
 			return 0;
 		});
-		return ans;
+
+		return nums.Select(m => int.Parse(string.Join("", m))).ToList();
 	}
 }
