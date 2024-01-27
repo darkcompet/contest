@@ -497,44 +497,10 @@ public abstract class BaseSolution {
 
 /// Run: dotnet run
 public class Solution : BaseSolution {
-	// public static void Main(params string[] args) {
-	// 	new Solution().Start();
-	// }
+	public static void Main(params string[] args) {
+		new Solution().Start();
+	}
 
-	// protected override void Solve() {
-	// 	LengthLongestPath("dir\n\tsubdir1\n\t\tfile1.ext\n\t\tsubsubdir1\n\tsubdir2\n\t\tsubsubdir2\n\t\t\tfile2.ext");
-	// }
-
-	public IList<int> LexicalOrder(int N) {
-		var nums = new List<int>[N];
-		for (var index = 0; index < N; ++index) {
-			var list = new List<int>();
-			var num = index + 1;
-			while (num > 0) {
-				list.Insert(0, num % 10);
-				num /= 10;
-			}
-			nums[index] = list;
-		}
-
-		Array.Sort(nums, (a, b) => {
-			for (var index = 0; index < Math.Min(a.Count, b.Count); ++index) {
-				if (a[index] < b[index]) {
-					return -1;
-				}
-				else if (a[index] > b[index]) {
-					return 1;
-				}
-			}
-			if (a.Count < b.Count) {
-				return -1;
-			}
-			if (a.Count > b.Count) {
-				return 1;
-			}
-			return 0;
-		});
-
-		return nums.Select(m => int.Parse(string.Join("", m))).ToList();
+	protected override void Solve() {
 	}
 }
