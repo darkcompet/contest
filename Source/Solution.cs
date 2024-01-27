@@ -497,10 +497,23 @@ public abstract class BaseSolution {
 
 /// Run: dotnet run
 public class Solution : BaseSolution {
-	public static void Main(params string[] args) {
-		new Solution().Start();
-	}
+	// public static void Main(params string[] args) {
+	// 	new Solution().Start();
+	// }
 
-	protected override void Solve() {
+	// protected override void Solve() {
+	// }
+
+	public char FindTheDifference(string s, string t) {
+		var count1 = new int[26];
+		var count2 = new int[26];
+		foreach (var ch in s) { count1[ch - 'a']++; }
+		foreach (var ch in t) { count2[ch - 'a']++; }
+		for (var index = 0; index < 26; ++index) {
+			if (count1[index] != count2[index]) {
+				return (char)(index + 'a');
+			}
+		}
+		return default;
 	}
 }
