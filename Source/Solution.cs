@@ -504,16 +504,23 @@ public class Solution : BaseSolution {
 	// protected override void Solve() {
 	// }
 
-	public char FindTheDifference(string s, string t) {
-		var count1 = new int[26];
-		var count2 = new int[26];
-		foreach (var ch in s) { count1[ch - 'a']++; }
-		foreach (var ch in t) { count2[ch - 'a']++; }
-		for (var index = 0; index < 26; ++index) {
-			if (count1[index] != count2[index]) {
-				return (char)(index + 'a');
-			}
+	public int LastRemaining(int n) {
+		return foo(true, 1, n, 1);
+	}
+	int foo(bool fromLeft, int start, int end, int diff) {
+		if (Math.Abs(end - start) == diff) {
+			return fromLeft ? end : start;
 		}
-		return default;
+		int nextStart;
+		int nextEnd;
+		if (fromLeft) {
+			nextEnd = start + diff;
+			nextStart = (start - end) % 2 == 0 ? end - diff : end;
+		}
+		else {
+			nextEnd = end - diff;
+			nextStart = (start - end) % 2 == 0 ? start + diff : start;
+		}
+		return foo(!fromLeft, nextStart, nextEnd, diff << 1);
 	}
 }
