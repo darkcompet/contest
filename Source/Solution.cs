@@ -504,23 +504,8 @@ public class Solution : BaseSolution {
 	// protected override void Solve() {
 	// }
 
-	public int LastRemaining(int n) {
-		return foo(true, 1, n, 1);
-	}
-	int foo(bool fromLeft, int start, int end, int diff) {
-		if (Math.Abs(end - start) == diff) {
-			return fromLeft ? end : start;
-		}
-		int nextStart;
-		int nextEnd;
-		if (fromLeft) {
-			nextEnd = start + diff;
-			nextStart = (start - end) % 2 == 0 ? end - diff : end;
-		}
-		else {
-			nextEnd = end - diff;
-			nextStart = (start - end) % 2 == 0 ? start + diff : start;
-		}
-		return foo(!fromLeft, nextStart, nextEnd, diff << 1);
+	public int LongestSubstring(string s, int k) {
+		var N = s.Length;
+		return 0;
 	}
 }
