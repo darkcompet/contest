@@ -379,15 +379,9 @@
 (,,,) https://leetcode.com/contest/leetcode-weekly-contest-6
 (,,,) https://leetcode.com/contest/leetcode-weekly-contest-5
 (,,,) https://leetcode.com/contest/leetcode-weekly-contest-4
-(,,,) https://leetcode.com/contest/leetcode-weekly-contest-3
-(,,,) https://leetcode.com/contest/leetcode-weekly-contest-2
-(,,,) https://leetcode.com/contest/leetcode-weekly-contest-1
-(,,,) https://leetcode.com/contest/leetcode-weekly-contest-7
-(,,,) https://leetcode.com/contest/leetcode-weekly-contest-6
-(,,,) https://leetcode.com/contest/leetcode-weekly-contest-5
-(,,,) https://leetcode.com/contest/leetcode-weekly-contest-4
 (1,2,3,) https://leetcode.com/contest/leetcode-weekly-contest-3
 (1,2,) https://leetcode.com/contest/leetcode-weekly-contest-2
+(,,,) https://leetcode.com/contest/leetcode-weekly-contest-1
 
 (1,2,,)https://leetcode.com/contest/biweekly-contest-123
 (,,,) https://leetcode.com/contest/biweekly-contest-122
