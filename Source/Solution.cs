@@ -502,6 +502,7 @@ public class Solution : BaseSolution {
 	// }
 
 	// protected override void Solve() {
+	// 	LongestSubstring("abcas", 4);
 	// }
 
 	public int LongestSubstring(string s, int k) {
@@ -509,33 +510,46 @@ public class Solution : BaseSolution {
 	}
 
 	private int dp(string s, int k, int startIndex, int endIndex) {
-		debugln($"{startIndex} -> {endIndex}");
 		if (startIndex > endIndex) {
 			return 0;
+		}
+		if (startIndex == endIndex) {
+			return k <= 1 ? 1 : 0;
 		}
 		var ch2indices = new Dictionary<char, List<int>>();
 		for (var index = startIndex; index <= endIndex; ++index) {
 			var indices = ch2indices.GetValueOrDefault(s[index]);
 			if (indices is null) {
-				ch2indices[s[index]] = indices = new();
+				ch2indices[s[index]] = indices = [];
 			}
 			indices.Add(index);
 		}
-		var dividers = new List<int>() { startIndex };
+		var dividers = new List<int>();
 		foreach (var entry in ch2indices) {
 			if (entry.Value.Count < k) {
 				dividers.AddRange(entry.Value);
 			}
 		}
-		if (dividers.Count == 1) {
+		if (dividers.Count == 0) {
 			return endIndex - startIndex + 1;
 		}
-		dividers.Add(endIndex);
+		if (dividers.Count == 1) {
+			return Math.Max(dp(s,k, startIndex, dividers[0]-1), dp(s,k,dividers[0]+1, endIndex));
+		}
 		dividers.Sort();
 		var maxLen = 0;
-		for (var index = 0; index < dividers.Count - 1; ++index) {
-			maxLen = Math.Max(maxLen, dp(s, k, dividers[index] + 1, dividers[index + 1] - 1));
+		for (var index = 0; index < dividers.Count; ++index) {
+			if (index == 0) {
+				maxLen = Math.Max(maxLen, dp(s, k, startIndex, dividers[index] - 1));
+			}
+			else {
+				if (index == dividers.Count - 1) {
+					maxLen = Math.Max(maxLen, dp(s, k, dividers[index] + 1, endIndex));
+				}
+				maxLen = Math.Max(maxLen, dp(s, k, dividers[index - 1] + 1, dividers[index] - 1));
+			}
 		}
+
 		return maxLen;
 	}
 }
