@@ -504,38 +504,10 @@ public class Solution : BaseSolution {
 	// protected override void Solve() {
 	// }
 
-	public int LongestSubstring(string s, int k) {
-		return dp(s, k, 0, s.Length - 1);
-	}
-
-	private int dp(string s, int k, int startIndex, int endIndex) {
-		debugln($"{startIndex} -> {endIndex}");
-		if (startIndex > endIndex) {
-			return 0;
-		}
-		var ch2indices = new Dictionary<char, List<int>>();
-		for (var index = startIndex; index <= endIndex; ++index) {
-			var indices = ch2indices.GetValueOrDefault(s[index]);
-			if (indices is null) {
-				ch2indices[s[index]] = indices = new();
-			}
-			indices.Add(index);
-		}
-		var dividers = new List<int>() { startIndex };
-		foreach (var entry in ch2indices) {
-			if (entry.Value.Count < k) {
-				dividers.AddRange(entry.Value);
-			}
-		}
-		if (dividers.Count == 1) {
-			return endIndex - startIndex + 1;
-		}
-		dividers.Add(endIndex);
-		dividers.Sort();
-		var maxLen = 0;
-		for (var index = 0; index < dividers.Count - 1; ++index) {
-			maxLen = Math.Max(maxLen, dp(s, k, dividers[index] + 1, dividers[index + 1] - 1));
-		}
-		return maxLen;
-	}
+	// public int CountMatchingSubarrays(int[] nums, int[] pattern) {
+	// 	for (var i = 0; i < nums.Length; ++i) {
+	// 		for (var j = i; j < nums.Length; ++j) {
+	// 		}
+	// 	}
+	// }
 }
