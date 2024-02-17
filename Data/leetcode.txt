@@ -1,5 +1,4 @@
 ---------- ONGOING ----------
-(1,2,3,) https://leetcode.com/contest/weekly-contest-384
 (1,2,3,)https://leetcode.com/contest/weekly-contest-383
 (1,2,3,) https://leetcode.com/contest/weekly-contest-382
 (1,2,3,) https://leetcode.com/contest/weekly-contest-381
@@ -510,3 +509,4 @@
 ---------- DONE ----------
 (1,2,3) https://leetcode.com/contest/warm-up-contest
 (1,2,3,4) https://leetcode.com/contest/leetcode-weekly-contest-3
+(1,2,3,4) https://leetcode.com/contest/weekly-contest-384
