@@ -505,10 +505,35 @@ public class Solution : BaseSolution {
 	// 	LongestSubstring("abcas", 4);
 	// }
 
-	// public int CountMatchingSubarrays(int[] nums, int[] pattern) {
-	// 	for (var i = 0; i < nums.Length; ++i) {
-	// 		for (var j = i; j < nums.Length; ++j) {
-	// 		}
-	// 	}
-	// }
+	public int MaxPalindromesAfterOperations(string[] words) {
+		var palinCount = 0;
+		var cnt = new int[26];
+		foreach (var w in words) {
+			foreach (var ch in w) {
+				cnt[ch - 'a']++;
+			}
+		}
+		var eventCount = 0;
+		foreach (var num in cnt) {
+			eventCount += 2 * (num / 2);
+		}
+		var oddCount = cnt.Sum() - eventCount;
+		Array.Sort(words, (w1, w2) => { return w1.Length - w2.Length; });
+		foreach (var w in words) {
+			var needPairCount = w.Length / 2;
+			eventCount -= needPairCount * 2;
+			if (w.Length % 2 == 1) {
+				if (oddCount > 0) {
+					--oddCount;
+				}
+				else if (eventCount > 0) {
+					--eventCount;
+				}
+			}
+			if (oddCount >= 0 && eventCount >= 0) {
+				++palinCount;
+			}
+		}
+		return palinCount;
+	}
 }
