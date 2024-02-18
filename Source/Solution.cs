@@ -503,4 +503,11 @@ public class Solution : BaseSolution {
 
 	// protected override void Solve() {
 	// }
+
+	public long CountPrefixSuffixPairs(string[] words) {
+		foreach (var w in words) {
+			//
+		}
+		return 0L;
+	}
 }
