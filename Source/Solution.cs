@@ -504,10 +504,34 @@ public class Solution : BaseSolution {
 	// protected override void Solve() {
 	// }
 
-	public long CountPrefixSuffixPairs(string[] words) {
-		foreach (var w in words) {
-			//
+	public int MaxRotateFunction(int[] nums) {
+		// f(0) = 0*a0 + 1*a1 + 2*a2 + ... + (n-1)*an-1
+		// f(1) = 0*an-1 + 1*a0 + 2*a1 + 3*a2 + ... + (n-1)*an-2 = [n-1][0 -> n-2]
+		// f(k) = 0*an-k + 1*an-k+1 + 2*an-k+2 + 3*an-k+3 + ... + (n-1)*an-1-k = [n-k -> n-1][0 -> n-k-1]
+		// f(k-1) = 0*an-k+1 + 1*an-k+2 + 2*an-k+3 + 3*an-k+4 + ... + (n-2)*an-1-k + (n-1)*an-k = [n-k+1 -> n-1][0 -> n-k]
+		// f(k) - f(k-1) = a[n-k+1] + ... + a[n-1] + a[0] + ... + a[n-k-1] - (n-1) * a[n-k] = a[0] + ... + a[n-1] - n * a[n-k]
+		cache = new int[nums.Length];
+		Array.Fill(cache, int.MinValue);
+		var totalSum = nums.Sum();
+		var max = int.MinValue;
+		for (var k = 0; k < nums.Length; ++k) {
+			max = Math.Max(max, f(nums, k, totalSum));
 		}
-		return 0L;
+		return max;
+	}
+	int[] cache;
+	int f(int[] nums, int k, int totalSum) {
+		if (cache[k] != int.MinValue) {
+			return cache[k];
+		}
+		var N = nums.Length;
+		if (k == 0) {
+			var tmpSum = 0;
+			for (var i = 0; i < N; ++i) {
+				tmpSum += i * nums[i];
+			}
+			return cache[k] = tmpSum;
+		}
+		return cache[k] = f(nums, k - 1, totalSum) + totalSum - N * nums[N - k];
 	}
 }
