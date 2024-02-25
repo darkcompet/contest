@@ -380,10 +380,10 @@
 (,,,) https://leetcode.com/contest/leetcode-weekly-contest-7
 (,,,) https://leetcode.com/contest/leetcode-weekly-contest-6
 (,,,) https://leetcode.com/contest/leetcode-weekly-contest-5
-(1,2,,) https://leetcode.com/contest/leetcode-weekly-contest-4
 (1,2,) https://leetcode.com/contest/leetcode-weekly-contest-2
 
 ---------- DONE ----------
 (1,2,3,4) https://leetcode.com/contest/weekly-contest-384
+(1,2,3,4) https://leetcode.com/contest/leetcode-weekly-contest-4
 (1,2,3,4) https://leetcode.com/contest/leetcode-weekly-contest-3
 (1,2,3) https://leetcode.com/contest/warm-up-contest

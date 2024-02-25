@@ -20,7 +20,7 @@ public class DisjoinSet {
 	/// <summary>
 	/// At each set, this holds its down tree and itself.
 	/// </summary>
-	private readonly List<int>[] descendant;
+	private readonly List<int>[] setElements;
 
 	/// <summary>
 	/// Opt: when merge 2 sets.
@@ -30,13 +30,13 @@ public class DisjoinSet {
 	public DisjoinSet(int elementCount) {
 		this.N = elementCount;
 		var set = this.set = new int[elementCount];
-		var descendant = this.descendant = new List<int>[elementCount];
+		var descendant = this.setElements = new List<int>[elementCount];
 		this.rank = new int[elementCount];
 
 		// Add default set for each element
 		for (var v = 0; v < elementCount; ++v) {
 			set[v] = v;
-			descendant[v] = new() { v };
+			descendant[v] = [v];
 		}
 	}
 
@@ -51,17 +51,17 @@ public class DisjoinSet {
 	/// <param name="u">Element 1 (must smaller than N)</param>
 	/// <param name="v">Element 2 (must smaller than N)</param>
 	public void MergeSets(int u, int v) {
-		var u_s = this.FindSet(u);
-		var v_s = this.FindSet(v);
-		if (u_s != v_s) {
+		var su = this.FindSet(u);
+		var sv = this.FindSet(v);
+		if (su != sv) {
 			// Opt: Only attach lower rank node to higher rank node to make tree height small as possible.
 			var rank = this.rank;
 			if (rank[u] > rank[v]) {
 				(u, v) = (v, u);
 			}
 			this.set[u] = v;
-			this.descendant[v_s].AddRange(this.descendant[u_s]);
-			this.descendant[u_s].Clear();
+			this.setElements[sv].AddRange(this.setElements[su]);
+			this.setElements[su].Clear();
 			if (rank[v] == rank[u]) {
 				++rank[v];
 			}
@@ -69,20 +69,20 @@ public class DisjoinSet {
 	}
 
 	/// <summary>
-	/// Find index of set (element, parent) that contains the value.
+	/// Find index of set (root element) that contains the value.
 	/// </summary>
 	/// <param name="v">Find the set that element belongs to (must smaller than N)</param>
 	/// <returns>Index of set that contains the element</returns>
 	public int FindSet(int v) {
-		var set = this.set;
-		if (set[v] == v) {
+		var parent = this.set;
+		if (parent[v] == v) {
 			return v;
 		}
 		// Opt: Compress path by remember highest parent of the element.
-		return set[v] = this.FindSet(set[v]);
+		return parent[v] = this.FindSet(parent[v]);
 	}
 
-	public List<int> GetSubtree(int v) {
-		return this.descendant[v];
+	public List<int> GetSetElements(int v) {
+		return this.setElements[v];
 	}
 }
