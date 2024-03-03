@@ -503,150 +503,22 @@ public class Solution : BaseSolution {
 	// protected override void Solve() {
 	// }
 
-	public class Weight {
-		public string name;
-		public double mul;
-	}
-	public class Node {
-		public int rootId;
-		public string name;
-		public double value;
-		public List<Weight> adjs = new();
-		public bool visited;
-	}
-	public double[] CalcEquation(IList<IList<string>> equations, double[] values, IList<IList<string>> queries) {
-		var N = values.Length;
-		var nodes = new Dictionary<string, Node>();
-		for (var i = 0; i < N; ++i) {
-			var pair = equations[i];
-			var node1 = nodes.GetValueOrDefault(pair[0]);
-			var node2 = nodes.GetValueOrDefault(pair[1]);
-			node1 ??= nodes[pair[0]] = new();
-			node2 ??= nodes[pair[1]] = new();
-			node1.adjs.Add(new() { name = pair[1], mul = values[i] });
-			node2.adjs.Add(new() { name = pair[0], mul = 1 / values[i] });
-			node1.name = pair[0];
-			node2.name = pair[1];
+	public int MinOperations(int[] nums, int k) {
+		var Q = new PriorityQueue<long, long>();
+		foreach (var num in nums) {
+			Q.Enqueue(num, num);
 		}
-
-		var nextRootId = 0;
-		foreach (var entry in nodes) {
-			var node = entry.Value;
-			if (!node.visited) {
-				node.visited = true;
-				node.value = 1;
-				node.rootId = ++nextRootId;
-				calcValueForNodes(nodes, node);
+		var ope = 0;
+		while (Q.Count != 0) {
+			var x = Q.Dequeue();
+			if (x >= k) {
+				return ope;
 			}
+			var y = Q.Dequeue();
+			++ope;
+			var z = (x << 1) + y;
+			Q.Enqueue(z, z);
 		}
-
-		var Q = queries.Count;
-		var ans = new double[Q];
-		for (var i = 0; i < Q; ++i) {
-			var query = queries[i];
-			var nodeA = nodes.GetValueOrDefault(query[0]);
-			var nodeB = nodes.GetValueOrDefault(query[1]);
-			if (nodeA is null || nodeB is null || nodeA.rootId != nodeB.rootId) {
-				ans[i] = -1;
-			}
-			else {
-				ans[i] = nodeA.value / nodeB.value;
-			}
-		}
-		return ans;
+		return ope;
 	}
-
-	private void calcValueForNodes(Dictionary<string, Node> nodes, Node parent) {
-		foreach (var adj in parent.adjs) {
-			var child = nodes.GetValueOrDefault(adj.name)!;
-			if (!child.visited) {
-				child.visited = true;
-				child.rootId = parent.rootId;
-				child.value = parent.value / adj.mul;
-				calcValueForNodes(nodes, child);
-			}
-		}
-	}
-
-	// public bool IsPossibleToSplit(int[] nums) {
-	// 	var count = new int[101];
-	// 	foreach (var num in nums) {
-	// 		count[num]++;
-	// 	}
-	// 	foreach (var cnt in count) {
-	// 		if (cnt > 2) {
-	// 			return false;
-	// 		}
-	// 	}
-	// 	return true;
-	// }
-
-	// public long LargestSquareArea(int[][] bottomLeft, int[][] topRight) {
-	// 	var N = bottomLeft.Length;
-	// 	var max = 0L;
-	// 	var rects = new Rectangle[N];
-	// 	for (var i = 0; i < N; ++i) {
-	// 		rects[i] = new Rectangle(bottomLeft[i][0], bottomLeft[i][1], topRight[i][0] - bottomLeft[i][0], topRight[i][1] - bottomLeft[i][1]);
-	// 	}
-	// 	for (var i = 0; i < N; ++i) {
-	// 		var rect1 = rects[i];
-	// 		for (var j = i + 1; j < N; ++j) {
-	// 			var rect2 = rects[j];
-	// 			var intersect = Rectangle.Intersect(rect1, rect2);
-	// 			if (intersect.Width > 0 && intersect.Height > 0) {
-	// 				long d = Math.Min(intersect.Width, intersect.Height);
-	// 				max = Math.Max(max, d * d);
-	// 			}
-	// 		}
-	// 	}
-	// 	return max;
-	// }
-
-	// public class Node {
-	// 	public int index;
-	// 	public int value;
-	// 	public int deadline;
-	// }
-	// public int EarliestSecondToMarkIndices(int[] nums, int[] changeIndices) {
-	// 	var N = nums.Length;
-	// 	var M = changeIndices.Length;
-	// 	if (M < N) {
-	// 		return -1;
-	// 	}
-	// 	var index2second = new int[N];
-	// 	var nodes = new Node[N];
-	// 	for (var index = 0; index < N; ++index) {
-	// 		nodes[index] = new() { index = index, value = nums[index] };
-	// 	}
-	// 	Array.Fill(index2second, -1);
-	// 	for (var sec = M - 1; sec >= 0; --sec) {
-	// 		var numIndex = changeIndices[sec] - 1;
-	// 		if (numIndex >= 0 && numIndex < N) {
-	// 			if (index2second[numIndex] == -1) {
-	// 				index2second[numIndex] = sec;
-	// 				nodes[numIndex].deadline = sec;
-	// 			}
-	// 		}
-	// 	}
-	// 	foreach (var index in index2second) {
-	// 		if (index < 0) {
-	// 			return -1;
-	// 		}
-	// 	}
-
-	// 	Array.Sort(nodes, (a, b) => {
-	// 		return a.deadline - b.deadline;
-	// 	});
-
-	// 	var elapsedSec = 0;
-	// 	for (var index = 0; index < N; ++index) {
-	// 		var node = nodes[index];
-	// 		elapsedSec += node.value;
-	// 		if (elapsedSec > node.deadline) {
-	// 			return -1;
-	// 		}
-	// 	}
-
-	// 	return elapsedSec;
-	// }
 }
