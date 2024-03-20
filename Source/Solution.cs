@@ -38,7 +38,8 @@ public abstract class BaseSolution {
 	public BaseSolution() {
 		// Before dotnet 6, we should use Path.GetFileName() instead.
 		// From dotnet 7, we can use Path.Exists() to test the file.
-		this.isDebug = this.inputFromFile = System.IO.Path.GetFileName("local.proof") != null;
+		// Note: atcoder raises unknown runtime error when GetFileName?
+		// this.isDebug = this.inputFromFile = System.IO.Path.GetFileName("local.proof") != null;
 	}
 
 	private long startTimeMillis;
@@ -501,25 +502,5 @@ public class Solution : BaseSolution {
 	}
 
 	protected override void Solve() {
-		var N = ni();
-		for (var K = (int)1E6; K >= 1; --K) {
-			if (1L * K * K * K > N) {
-				continue;
-			}
-			var s = K.ToString();
-			var M = s.Length - 1;
-			var ok = true;
-			for (var index = M / 2; index >= 0; --index) {
-				if (s[index] != s[M - index]) {
-					ok = false;
-					break;
-				}
-			}
-
-			if (ok) {
-				println(K);
-				break;
-			}
-		}
 	}
 }
