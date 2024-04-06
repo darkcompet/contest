@@ -1,5 +1,6 @@
 public class DifferentAdjacent {
 	/// <summary>
+	/// Time: O(N)
 	/// Ref: https://leetcode.com/problems/count-alternating-subarrays/
 	/// </summary>
 	/// <param name="arr"></param>

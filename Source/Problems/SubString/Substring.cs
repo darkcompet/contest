@@ -2,6 +2,7 @@ public class Substring {
 	/// <summary>
 	/// For each string, find shortest substring that another string does not contain it.
 	/// Ref: https://leetcode.com/contest/weekly-contest-388/problems/shortest-uncommon-substring-in-an-array/
+	/// Time: O(N * logN)
 	/// </summary>
 	/// <param name="arr"></param>
 	/// <returns></returns>
