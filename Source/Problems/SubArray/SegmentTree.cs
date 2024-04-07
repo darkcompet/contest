@@ -25,12 +25,8 @@ public class SegmentTree {
 			while (low <= high) {
 				var mid = (low + high) >> 1;
 
-				// If OR of subarray [i..mid] >= K,
-				// then all subsequent subarrays will
-				// have OR >= K therefore reduce
-				// high to mid - 1 to find the
-				// minimal length subarray
-				// [i..mid] having OR >= K
+				// If OR of subarray [i..mid] >= K, then all subsequent subarrays will have OR >= K,
+				// therefore reduce high to mid - 1 to find the minimal length subarray [i..mid] having OR >= K
 				if (Query(tree, 1, 0, N - 1, index, mid) >= K) {
 					minPos = Math.Min(minPos, mid);
 					high = mid - 1;
