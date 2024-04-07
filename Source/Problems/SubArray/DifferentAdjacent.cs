@@ -1,3 +1,5 @@
+namespace Compet.Problems;
+
 public class DifferentAdjacent {
 	/// <summary>
 	/// Time: O(N)

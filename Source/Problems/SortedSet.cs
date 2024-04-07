@@ -1,3 +1,5 @@
+namespace Compet.Problems;
+
 public class SortedSet {
 	public class Node {
 		public int index;

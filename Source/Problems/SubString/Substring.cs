@@ -1,3 +1,5 @@
+namespace Compet.Problems;
+
 public class Substring {
 	/// <summary>
 	/// For each string, find shortest substring that another string does not contain it.
