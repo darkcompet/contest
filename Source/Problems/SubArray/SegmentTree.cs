@@ -14,7 +14,7 @@ public class SegmentTree {
 
 		// We need 4N nodes
 		var tree = new int[N << 2];
-		Build(tree, nums, 1, 0, N - 1);
+		_BuildTree(tree, nums, 1, 0, N - 1);
 
 		var count = 0;
 		for (var index = 0; index < N; ++index) {
@@ -48,7 +48,7 @@ public class SegmentTree {
 	}
 
 	// Builds the segment tree
-	private static void Build(int[] tree, int[] arr, int node, int start, int end) {
+	private static void _BuildTree(int[] tree, int[] arr, int node, int start, int end) {
 		if (start == end) {
 			tree[node] = arr[start];
 			return;
@@ -56,8 +56,8 @@ public class SegmentTree {
 		var mid = (start + end) >> 1;
 		var leftNode = node << 1;
 		var rightNode = leftNode + 1;
-		Build(tree, arr, leftNode, start, mid);
-		Build(tree, arr, rightNode, mid + 1, end);
+		_BuildTree(tree, arr, leftNode, start, mid);
+		_BuildTree(tree, arr, rightNode, mid + 1, end);
 
 		// Aggregate here
 		tree[node] = tree[leftNode] | tree[rightNode];
