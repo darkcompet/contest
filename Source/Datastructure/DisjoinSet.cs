@@ -82,7 +82,12 @@ public class DisjoinSet {
 		var descendants = new Dictionary<int, List<int>>();
 		for (var v = this.elementCount - 1; v >= 0; --v) {
 			var p = this.FindSet(v);
-			var descendant = descendants[p] = descendants.GetValueOrDefault(p) ?? [];
+			// For .NET 8, can use: descendants.GetValueOrDefault(p) ?? [];
+			// But for .NET 7-, we have to use below syntax.
+			var descendant = descendants.GetValueOrDefault(p);
+			if (descendant is null) {
+				descendant = descendants[p] = new();
+			}
 			descendant.Add(v);
 		}
 		return descendants;
