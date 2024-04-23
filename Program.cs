@@ -1,5 +1,5 @@
 ﻿
-Solution.Main(args);
+Contest.Main(args);
 
 // var fs = File.OpenWrite("./Data/leetcode.txt");
 // var buffer = new List<byte>();

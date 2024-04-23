@@ -1,3 +1,7 @@
+// There exist some heaps:
+// - Binary heap
+// - Fibonacci heap
+
 namespace Compet.Datastructure;
 
 using System.Collections;
