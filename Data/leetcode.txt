@@ -4,6 +4,10 @@ https://leetcode.com/contest/smarking-algorithm-contest-3
 https://leetcode.com/contest/smarking-algorithm-contest-2
 https://leetcode.com/contest/smarking-algorithm-contest
 
+(,,,) https://leetcode.com/contest/biweekly-contest-132
+(,,,) https://leetcode.com/contest/biweekly-contest-131
+(,,,) https://leetcode.com/contest/biweekly-contest-130
+(1,2,,) https://leetcode.com/contest/biweekly-contest-129
 (1,2,,) https://leetcode.com/contest/biweekly-contest-128
 (1,2,3,) https://leetcode.com/contest/biweekly-contest-127
 (1,2,,) https://leetcode.com/contest/biweekly-contest-126
@@ -133,8 +137,16 @@ https://leetcode.com/contest/smarking-algorithm-contest
 (,,,) https://leetcode.com/contest/biweekly-contest-2
 (,,,) https://leetcode.com/contest/biweekly-contest-1
 
-(1,2,,) https://leetcode.com/contest/weekly-contest-394/
-(1,2,3,) https://leetcode.com/contest/weekly-contest-391/
+
+(1,2,,) https://leetcode.com/contest/weekly-contest-401
+(1,2,,) https://leetcode.com/contest/weekly-contest-400
+(1,2,,) https://leetcode.com/contest/weekly-contest-399
+(1,2,,) https://leetcode.com/contest/weekly-contest-398
+(1,2,,) https://leetcode.com/contest/weekly-contest-397
+(1,2,,) https://leetcode.com/contest/weekly-contest-396
+(1,2,,) https://leetcode.com/contest/weekly-contest-395
+(1,2,,) https://leetcode.com/contest/weekly-contest-394
+(1,2,3,) https://leetcode.com/contest/weekly-contest-391
 (1,,,) https://leetcode.com/contest/weekly-contest-390
 (1,2,,) https://leetcode.com/contest/weekly-contest-389
 (1,2,3,) https://leetcode.com/contest/weekly-contest-388

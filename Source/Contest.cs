@@ -523,5 +523,19 @@ public class Contest : BaseContest {
 	}
 
 	protected override void Solve() {
+		var N = ni();
+		var L = ni();
+		var R = ni();
+		var ans = new List<int>(N);
+		for (var i = 1; i < L; ++i) {
+			ans.Add(i);
+		}
+		for (var i = R; i >= L; --i) {
+			ans.Add(i);
+		}
+		for (var i = R + 1; i <= N; ++i) {
+			ans.Add(i);
+		}
+		print(string.Join(' ', ans));
 	}
 }
