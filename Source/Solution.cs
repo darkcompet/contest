@@ -16,15 +16,12 @@ public class BaseSolution {
 		return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 	}
 
-	protected void debug(string text) {
-		if (this.isDebug) {
-			Console.Write(text);
-		}
+	protected virtual void debug(string text) {
+		Console.Write(text);
 	}
-	protected void debugln(string text) {
-		if (this.isDebug) {
-			Console.WriteLine(text);
-		}
+
+	protected virtual void debugln(string text) {
+		Console.WriteLine(text);
 	}
 
 	protected void assert(bool condition, string? message = null) {
