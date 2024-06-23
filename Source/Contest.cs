@@ -8,8 +8,7 @@
 /// - Use hyphen (_) to separate/group long number (but it does not work in mono).
 /// - Use new keyword to override base method that does not declare with virtual keyword.
 /// </summary>
-public abstract class BaseContest {
-	protected readonly bool isDebug;
+public abstract class BaseContest : BaseSolution {
 	protected bool inputFromFile;
 	protected bool outputToFile;
 
@@ -470,49 +469,6 @@ public abstract class BaseContest {
 		if (this.nextReadByteIndex-- <= 0) {
 			throw new Exception("Cannot unread more");
 		}
-	}
-
-	/// <summary>
-	/// Utc epoch time in millis.
-	/// </summary>
-	/// <returns>Elapsed UTC-time from Epoch in milliseconds</returns>
-	protected static long Now() {
-		return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-	}
-
-	protected void debug(string text) {
-		if (this.isDebug) {
-			Console.Write(text);
-		}
-	}
-	protected void debugln(string text) {
-		if (this.isDebug) {
-			Console.WriteLine(text);
-		}
-	}
-
-	protected void assert(bool condition, string? message = null) {
-		System.Diagnostics.Debug.Assert(condition, message);
-	}
-
-	protected int min(params int[] arr) {
-		var ans = arr[0];
-		for (var i = arr.Length - 1; i > 0; --i) {
-			if (ans < arr[i]) {
-				ans = arr[i];
-			}
-		}
-		return ans;
-	}
-
-	protected int max(params int[] arr) {
-		var ans = arr[0];
-		for (var i = arr.Length - 1; i > 0; --i) {
-			if (ans > arr[i]) {
-				ans = arr[i];
-			}
-		}
-		return ans;
 	}
 }
 
