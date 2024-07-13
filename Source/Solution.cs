@@ -1,7 +1,20 @@
-public class HashMap<TKey, TValue> : Dictionary<TKey, TValue?> where TKey : notnull {
+public class DkHashMap<TKey, TValue> : Dictionary<TKey, TValue> where TKey : notnull {
+	/// <summary>
+	/// Null/Default value means the key may not exist.
+	/// </summary>
+	/// <param name="key"></param>
+	/// <returns></returns>
 	public new TValue? this[TKey key] {
 		get => this.GetValueOrDefault(key, default);
-		set => base[key] = value;
+		set => base[key] = value!;
+	}
+
+	public TValue GetOrSet(TKey key, TValue initValue) {
+		if (this.TryGetValue(key, out var value)) {
+			return value;
+		}
+		base[key] = initValue;
+		return initValue;
 	}
 }
 
@@ -16,19 +29,19 @@ public class BaseSolution {
 		return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 	}
 
-	protected virtual void debug(string text) {
+	protected virtual void Debug(string text) {
 		Console.Write(text);
 	}
 
-	protected virtual void debugln(string text) {
+	protected virtual void Debugln(string text) {
 		Console.WriteLine(text);
 	}
 
-	protected void assert(bool condition, string? message = null) {
+	protected void Assert(bool condition, string? message = null) {
 		System.Diagnostics.Debug.Assert(condition, message);
 	}
 
-	protected int min(params int[] arr) {
+	protected int Min(params int[] arr) {
 		var ans = arr[0];
 		for (var i = arr.Length - 1; i > 0; --i) {
 			if (ans < arr[i]) {
@@ -38,7 +51,7 @@ public class BaseSolution {
 		return ans;
 	}
 
-	protected int max(params int[] arr) {
+	protected int Max(params int[] arr) {
 		var ans = arr[0];
 		for (var i = arr.Length - 1; i > 0; --i) {
 			if (ans > arr[i]) {

@@ -1,6 +1,6 @@
-[submodule "Tool/Compet/csharp-core"]
-	path = Tool/Compet/csharp-core
-	url = https://github.com/darkcompet/csharp-core.git
-[submodule "Tool/Compet/csharp-net-core"]
-	path = Tool/Compet/csharp-net-core
-	url = https://github.com/darkcompet/csharp-net-core
+[submodule "Tool/Compet/cs"]
+	path = Tool/Compet/cs
+	url = https://github.com/darkcompet/cs.git
+[submodule "Tool/Compet/cs-net"]
+	path = Tool/Compet/cs-net
+	url = https://github.com/darkcompet/cs-net.git

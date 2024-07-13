@@ -471,15 +471,15 @@ public abstract class BaseContest : BaseSolution {
 		}
 	}
 
-	protected override void debug(string text) {
+	protected override void Debug(string text) {
 		if (this.isDebug) {
-			base.debug(text);
+			base.Debug(text);
 		}
 	}
 
-	protected override void debugln(string text) {
+	protected override void Debugln(string text) {
 		if (this.isDebug) {
-			base.debugln(text);
+			base.Debugln(text);
 		}
 	}
 }
