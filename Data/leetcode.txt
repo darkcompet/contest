@@ -138,6 +138,9 @@ https://leetcode.com/contest/smarking-algorithm-contest
 (,,,) https://leetcode.com/contest/biweekly-contest-2
 (,,,) https://leetcode.com/contest/biweekly-contest-1
 
+(1,,,) https://leetcode.com/contest/weekly-contest-406
+(,,,) https://leetcode.com/contest/weekly-contest-405
+(,,,) https://leetcode.com/contest/weekly-contest-404
 (,,,) https://leetcode.com/contest/weekly-contest-403
 (1,2,,) https://leetcode.com/contest/weekly-contest-402
 (1,2,,) https://leetcode.com/contest/weekly-contest-401
