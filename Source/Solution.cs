@@ -51,7 +51,27 @@ public class BaseSolution {
 		return ans;
 	}
 
+	protected long Min(params long[] arr) {
+		var ans = arr[0];
+		for (var i = arr.Length - 1; i > 0; --i) {
+			if (ans < arr[i]) {
+				ans = arr[i];
+			}
+		}
+		return ans;
+	}
+
 	protected int Max(params int[] arr) {
+		var ans = arr[0];
+		for (var i = arr.Length - 1; i > 0; --i) {
+			if (ans > arr[i]) {
+				ans = arr[i];
+			}
+		}
+		return ans;
+	}
+
+	protected long Max(params long[] arr) {
 		var ans = arr[0];
 		for (var i = arr.Length - 1; i > 0; --i) {
 			if (ans > arr[i]) {
