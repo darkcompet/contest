@@ -83,4 +83,26 @@ public class BaseSolution {
 }
 
 public class Solution : BaseSolution {
+	public int[] ResultsArray(int[][] queries, int k) {
+		var maxHeap = new PriorityQueue<int, int>();
+		var dists = new int[queries.Length];
+		for (var i = 0; i < queries.Length; ++i) {
+			var x = queries[i][0];
+			var y = queries[i][1];
+			var d = Math.Abs(x) + Math.Abs(y);
+			maxHeap.Enqueue(d, -d);
+			var removeCount = maxHeap.Count - k;
+			while (removeCount-- > 0) {
+				maxHeap.Dequeue();
+			}
+
+			if (i + 1 < k) {
+				dists[i] = -1;
+			}
+			else {
+				dists[i] = maxHeap.Peek();
+			}
+		}
+		return dists;
+	}
 }

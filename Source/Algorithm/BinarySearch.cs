@@ -10,8 +10,8 @@ public class BinarySearch {
 	/// <param name="startIndex"></param>
 	/// <param name="endIndex"></param>
 	/// <returns>Index of first value that >= target. Return -1 if not found such value.</returns>
-	public int LowerBound(int[] values, int minValue, int startIndex, int endIndex) {
-		if (startIndex < 0 || startIndex > endIndex || endIndex >= values.Length) {
+	public int LowerBound(List<int> values, int minValue, int startIndex, int endIndex) {
+		if (startIndex < 0 || startIndex > endIndex || endIndex >= values.Count) {
 			return -1;
 		}
 		var midIndex = 0;
@@ -51,8 +51,8 @@ public class BinarySearch {
 	/// <param name="startIndex"></param>
 	/// <param name="endIndex"></param>
 	/// <returns>Index of first value that <= target. Return -1 if not found such value.</returns>
-	public int UpperBound(int[] values, int maxValue, int startIndex, int endIndex) {
-		if (startIndex < 0 || startIndex > endIndex || endIndex >= values.Length) {
+	public int UpperBound(List<int> values, int maxValue, int startIndex, int endIndex) {
+		if (startIndex < 0 || startIndex > endIndex || endIndex >= values.Count) {
 			return -1;
 		}
 		var midIndex = 0;

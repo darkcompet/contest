@@ -1,6 +1,6 @@
 namespace Compet.Problems;
 
-public class MaxSumOfSubArray {
+public class SubArray {
 	/// <summary>
 	/// Find max sum of subarray. It can find best range too.
 	/// Time: O(N)
