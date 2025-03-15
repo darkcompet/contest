@@ -21,14 +21,6 @@ public class DkHashMap<TKey, TValue> : Dictionary<TKey, TValue> where TKey : not
 public class BaseSolution {
 	protected bool isDebug;
 
-	/// <summary>
-	/// Utc epoch time in millis.
-	/// </summary>
-	/// <returns>Elapsed UTC-time from Epoch in milliseconds</returns>
-	protected static long Now() {
-		return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-	}
-
 	protected virtual void Debug(string text) {
 		Console.Write(text);
 	}
@@ -82,6 +74,9 @@ public class BaseSolution {
 	}
 }
 
+/// <summary>
+/// Without main method.
+/// </summary>
 public class Solution : BaseSolution {
 	public int[] ResultsArray(int[][] queries, int k) {
 		var maxHeap = new PriorityQueue<int, int>();

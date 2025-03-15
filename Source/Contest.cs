@@ -1,12 +1,5 @@
-#pragma warning disable IDE0078 // パターン マッチングを使用します
-#pragma warning disable IDE0058 // 式の値が使用されていません
-#pragma warning disable IDE0009 // メンバー アクセスを修飾する必要があります。
-
 /// <summary>
-/// This performs read/write on ASCII chars which be in range [0, 255] (see: https://www.asciitable.com/).
-/// TechNotes:
-/// - Use hyphen (_) to separate/group long number (but it does not work in mono).
-/// - Use new keyword to override base method that does not declare with virtual keyword.
+/// This supports read/write on ASCII chars which be in range [0, 255] (see: https://www.asciitable.com/).
 /// </summary>
 public abstract class BaseContest : BaseSolution {
 	protected bool inputFromFile;
@@ -19,6 +12,7 @@ public abstract class BaseContest : BaseSolution {
 
 	/// White space chars: space, tab, linefeed
 	private const int WHITE_SPACE_CODE = 32;
+
 	private const int IN_BUFFER_SIZE = 1 << 14;
 	private const int OUT_BUFFER_SIZE = 1 << 14;
 
@@ -32,7 +26,9 @@ public abstract class BaseContest : BaseSolution {
 	private byte[] outBytes;
 	private int nextWriteByteIndex;
 
+	/// <summary>
 	/// To store chars of int, long (9223372036854775807) when write to out-buffer
+	/// </summary>
 	private readonly byte[] scratchBytes = new byte[19];
 
 	public BaseContest() {
@@ -50,13 +46,13 @@ public abstract class BaseContest : BaseSolution {
 		}
 
 		// Init IO
-		this.inStream = this.inputFromFile ?
-			new FileStream(Path.GetFullPath("Data/in.txt"), FileMode.Open, FileAccess.Read, FileShare.ReadWrite) :
-			Console.OpenStandardInput();
+		this.inStream = this.inputFromFile
+			? new FileStream(Path.GetFullPath("Data/in.txt"), FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+			: Console.OpenStandardInput();
 
-		this.outStream = this.outputToFile ?
-			new FileStream(Path.GetFullPath("Data/out.txt"), FileMode.Open, FileAccess.Write, FileShare.ReadWrite) :
-			Console.OpenStandardOutput();
+		this.outStream = this.outputToFile
+			? new FileStream(Path.GetFullPath("Data/out.txt"), FileMode.Open, FileAccess.Write, FileShare.ReadWrite)
+			: Console.OpenStandardOutput();
 
 		this.inBytes = new byte[IN_BUFFER_SIZE];
 		this.outBytes = new byte[OUT_BUFFER_SIZE];
@@ -88,7 +84,7 @@ public abstract class BaseContest : BaseSolution {
 
 		// Assert digit
 		if (nextChar < '0' || nextChar > '9') {
-			throw new Exception("Digit expected");
+			throw new InvalidDataException("Digit expected");
 		}
 
 		while (true) {
@@ -119,7 +115,7 @@ public abstract class BaseContest : BaseSolution {
 
 		// Assert digit
 		if (nextChar < '0' || nextChar > '9') {
-			throw new Exception("Digit expected");
+			throw new InvalidDataException("Digit expected");
 		}
 
 		while (true) {
@@ -151,7 +147,7 @@ public abstract class BaseContest : BaseSolution {
 
 		// Assert digit
 		if (nextChar < '0' || nextChar > '9') {
-			throw new Exception("Digit expected");
+			throw new InvalidDataException("Digit expected");
 		}
 
 		var endOfStream = false;
@@ -197,7 +193,7 @@ public abstract class BaseContest : BaseSolution {
 
 		// Assert digit
 		if (nextChar < '0' || nextChar > '9') {
-			throw new Exception("Digit expected");
+			throw new InvalidDataException("Digit expected");
 		}
 
 		var endOfStream = false;
@@ -375,8 +371,7 @@ public abstract class BaseContest : BaseSolution {
 		do {
 			buffer[--curIndex] = (byte)((isNegative ? -(num % 10) : (num % 10)) + '0');
 			num /= 10;
-		}
-		while (num != 0);
+		} while (num != 0);
 
 		// Write to buffer
 		if (isNegative) {
@@ -393,8 +388,7 @@ public abstract class BaseContest : BaseSolution {
 		do {
 			buffer[--curIndex] = (byte)((isNegative ? -(num % 10) : (num % 10)) + '0');
 			num /= 10;
-		}
-		while (num != 0);
+		} while (num != 0);
 
 		// Write to buffer
 		if (isNegative) {
@@ -461,13 +455,13 @@ public abstract class BaseContest : BaseSolution {
 				return nextByte;
 			}
 		}
-		throw new Exception("Cannot read more");
+		throw new InvalidDataException("Cannot read more");
 	}
 
 	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	private void _UnreadNextByte() {
 		if (this.nextReadByteIndex-- <= 0) {
-			throw new Exception("Cannot unread more");
+			throw new InvalidDataException("Cannot unread more");
 		}
 	}
 
@@ -484,7 +478,9 @@ public abstract class BaseContest : BaseSolution {
 	}
 }
 
-/// Run: dotnet run
+/// <summary>
+/// With main method + IO reader/writer.
+/// </summary>
 public class Contest : BaseContest {
 	public static void Main(params string[] args) {
 		new Contest().Start();
